@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cliente - Minha Loja</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Minha Loja</h1>
+    <nav>
+      <ul>
+        <li><a href="#produtos">Produtos</a></li>
+        <li><a href="#carrinho">Carrinho (<span id="cart-count">0</span>)</a></li>
+        <li><a href="#pedidos">Meus Pedidos</a></li>
+        <li><a href="#perfil">Perfil</a></li>
+        <li><a href="#" onclick="logout()">Sair</a></li>
+      </ul>
+    </nav>
+    <div class="user-info">
+      Bem-vindo, <span id="user-name"></span>!
+    </div>
+  </header>
+
+  <main>
+    <!-- Seção de Produtos -->
+    <section id="produtos" class="section active">
+      <h2>Produtos Disponíveis</h2>
+      
+      <div class="filters">
+        <select id="categoryFilter">
+          <option value="">Todas as Categorias</option>
+          <option value="roupas">Roupas</option>
+          <option value="calcados">Calçados</option>
+          <option value="acessorios">Acessórios</option>
+          <option value="eletronicos">Eletrônicos</option>
+        </select>
+        
+        <input type="text" id="searchInput" placeholder="Buscar produtos...">
+        <button onclick="filterProducts()">Filtrar</button>
+      </div>
+      
+      <div class="grid-produtos" id="product-list">
+        <!-- Produtos serão carregados aqui -->
+      </div>
+    </section>
+
+    <!-- Seção do Carrinho -->
+    <section id="carrinho" class="section">
+      <h2>Carrinho de Compras</h2>
+      <div id="cart-items"></div>
+      <div class="cart-total">
+        <h3>Total: R$ <span id="cart-total">0.00</span></h3>
+        <button onclick="showCheckout()" class="btn-primary">Finalizar Compra</button>
+        <button onclick="clearCart()" class="btn-secondary">Limpar Carrinho</button>
+      </div>
+    </section>
+
+    <!-- Seção de Pedidos -->
+    <section id="pedidos" class="section">
+      <h2>Meus Pedidos</h2>
+      <div id="orders-list">
+        <!-- Pedidos serão carregados aqui -->
+      </div>
+    </section>
+
+    <!-- Seção do Perfil -->
+    <section id="perfil" class="section">
+      <h2>Meu Perfil</h2>
+      <form id="profileForm" class="profile-form">
+        <div class="form-group">
+          <label for="profileName">Nome:</label>
+          <input type="text" id="profileName" name="name">
+        </div>
+        
+        <div class="form-group">
+          <label for="profileEmail">Email:</label>
+          <input type="email" id="profileEmail" name="email">
+        </div>
+        
+        <div class="form-group">
+          <label for="profilePhone">Telefone:</label>
+          <input type="tel" id="profilePhone" name="phone">
+        </div>
+        
+        <div class="form-group">
+          <label for="profileAddress">Endereço:</label>
+          <input type="text" id="profileAddress" name="address">
+        </div>
+        
+        <div class="form-group">
+          <label for="profileCity">Cidade:</label>
+          <input type="text" id="profileCity" name="city">
+        </div>
+        
+        <div class="form-group">
+          <label for="profileCep">CEP:</label>
+          <input type="text" id="profileCep" name="cep">
+        </div>
+        
+        <button type="submit">Atualizar Perfil</button>
+      </form>
+    </section>
+  </main>
+
+  <!-- Modal de Checkout -->
+  <div id="checkoutModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeCheckoutModal()">&times;</span>
+      <h2>Finalizar Compra</h2>
+      
+      <div class="checkout-summary">
+        <h3>Resumo do Pedido</h3>
+        <div id="checkout-items"></div>
+        <div class="checkout-total">
+          <strong>Total: R$ <span id="checkout-total">0.00</span></strong>
+        </div>
+      </div>
+      
+      <form id="checkoutForm" class="checkout-form">
+        <h3>Dados de Entrega</h3>
+        
+        <div class="form-group">
+          <label for="deliveryAddress">Endereço de Entrega:</label>
+          <textarea id="deliveryAddress" name="address" required></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="paymentMethod">Forma de Pagamento:</label>
+          <select id="paymentMethod" name="payment" required>
+            <option value="">Selecione...</option>
+            <option value="cartao_credito">Cartão de Crédito</option>
+            <option value="cartao_debito">Cartão de Débito</option>
+            <option value="pix">PIX</option>
+            <option value="boleto">Boleto</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="observations">Observações:</label>
+          <textarea id="observations" name="observations" placeholder="Observações especiais..."></textarea>
+        </div>
+        
+        <button type="submit" class="btn-primary">Confirmar Pedido</button>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; <span id="ano"></span> Minha Loja. Todos os direitos reservados.</p>
+  </footer>
+
+  <script src="client.js"></script>
+</body>
+</html>

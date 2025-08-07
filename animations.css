@@ -1,0 +1,281 @@
+/* Animações e Efeitos Especiais Premium */
+
+/* Animações de movimento suave */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% { transform: translate3d(0, 0, 0); }
+  40%, 43% { transform: translate3d(0, -15px, 0); }
+  70% { transform: translate3d(0, -8px, 0); }
+  90% { transform: translate3d(0, -3px, 0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+  50% { 
+    opacity: 0.8; 
+    transform: scale(1.05); 
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes glow {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 40px rgba(78, 205, 196, 0.6), 0 0 60px rgba(78, 205, 196, 0.4);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes swing {
+  15% { transform: translateX(5px); }
+  30% { transform: translateX(-5px); }
+  45% { transform: translateX(3px); }
+  60% { transform: translateX(-3px); }
+  75% { transform: translateX(2px); }
+  90% { transform: translateX(-1px); }
+  100% { transform: translateX(0px); }
+}
+
+@keyframes heartbeat {
+  0%, 50%, 100% { transform: scale(1); }
+  25%, 75% { transform: scale(1.1); }
+}
+
+@keyframes typewriter {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes blink {
+  50% { border-color: transparent; }
+}
+
+/* Efeitos de hover suaves */
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px);
+}
+
+.hover-scale {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.hover-rotate {
+  transition: transform 0.3s ease;
+}
+
+.hover-rotate:hover {
+  transform: rotate(5deg);
+}
+
+.hover-glow {
+  transition: box-shadow 0.3s ease;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 30px rgba(78, 205, 196, 0.5);
+}
+
+/* Classes de animação reutilizáveis */
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-bounce {
+  animation: bounce 2s infinite;
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease forwards;
+}
+
+.animate-slide-up {
+  animation: slideInUp 0.6s ease forwards;
+}
+
+.animate-slide-left {
+  animation: slideInLeft 0.6s ease forwards;
+}
+
+.animate-slide-right {
+  animation: slideInRight 0.6s ease forwards;
+}
+
+.animate-scale-in {
+  animation: fadeInScale 0.4s ease forwards;
+}
+
+.animate-heartbeat {
+  animation: heartbeat 1.5s ease infinite;
+}
+
+.animate-swing {
+  animation: swing 1s ease;
+}
+
+/* Delays para animações em sequência */
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+
+/* Estados iniciais para animações */
+.will-animate {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+/* Loading states elegantes */
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(78, 205, 196, 0.3);
+  border-top: 4px solid #4ecdc4;
+  border-radius: 50%;
+  animation: rotate 1s linear infinite;
+}
+
+.loading-dots::after {
+  content: '';
+  animation: typewriter 1.5s steps(3) infinite;
+}
+
+.loading-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Transições suaves para elementos interativos */
+.smooth-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.smooth-transition-fast {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.smooth-transition-slow {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Melhorias de performance */
+.animate-float,
+.animate-bounce,
+.animate-pulse,
+.hover-lift,
+.hover-scale {
+  will-change: transform;
+}
+
+.animate-shimmer,
+.loading-spinner {
+  will-change: transform, opacity;
+}
