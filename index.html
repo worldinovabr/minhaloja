@@ -3,39 +3,291 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minha Loja</title>
+  <title>Minha Loja - E-commerce Completo</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="cart-modal.css">
+  <link rel="stylesheet" href="register-modal.css">
+  <link rel="stylesheet" href="product-styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script type="module" src="firebase-config.js"></script>
+  <script type="module" src="auth-manager.js"></script>
+  <script type="module" src="product-manager.js"></script>
 </head>
 <body>
+  <!-- Header Principal -->
   <header>
-    <h1 id="store-name">Nome da Loja</h1>
-    <nav>
-      <ul>
-        <li><a href="#home">Início</a></li>
-        <li><a href="#produtos">Produtos</a></li>
-        <li><a href="#carrinho">Carrinho</a></li>
-      </ul>
-    </nav>
+    <div class="header-content">
+      <div class="logo-section">
+        <h1 onclick="showSection('home')" id="store-name">Minha Loja</h1>
+      </div>
+      
+      <nav class="nav-bar">
+        <a href="#home" onclick="showSection('home')" class="nav-link active">
+          <i class="fas fa-home"></i> Início
+        </a>
+        <a href="#produtos" onclick="showSection('produtos')" class="nav-link">
+          <i class="fas fa-shopping-bag"></i> Produtos
+        </a>
+        <a href="#sobre" onclick="showSection('sobre')" class="nav-link">
+          <i class="fas fa-info-circle"></i> Sobre
+        </a>
+        <a href="#contato" onclick="showSection('contato')" class="nav-link">
+          <i class="fas fa-envelope"></i> Contato
+        </a>
+      </nav>
+      
+      <!-- Barra de Busca -->
+      <div class="search-section">
+        <div class="search-container">
+          <input type="text" id="search-input" placeholder="Buscar produtos..." onkeypress="handleSearchKeypress(event)">
+          <button onclick="searchProducts()" class="search-btn">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Seção do Usuário -->
+      <div class="user-section">
+        <div class="cart-info" onclick="showCartModal()">
+          <i class="fas fa-shopping-cart"></i>
+          <span class="cart-count" id="cart-count">0</span>
+        </div>
+        
+        <div class="user-info">
+          <i class="fas fa-user"></i>
+          <span id="user-name">Visitante</span>
+        </div>
+        
+        <div class="auth-buttons">
+          <button class="btn-login" onclick="window.location.href='login.html'">
+            <i class="fas fa-sign-in-alt"></i> Login
+          </button>
+          <button class="btn-register" onclick="openRegisterModal()">
+            <i class="fas fa-user-plus"></i> Cadastrar
+          </button>
+        </div>
+      </div>
+    </div>
   </header>
 
   <main>
-    <section id="produtos" class="produtos">
-      <h2>Produtos em Destaque</h2>
-      <div class="grid-produtos" id="product-list">
-        <!-- Os produtos serão adicionados pelo JS -->
+    <!-- Seção Home -->
+    <section id="home" class="section active">
+      <div class="hero-banner">
+        <div class="banner-content">
+          <h2>Bem-vindo à Nossa Loja</h2>
+          <p>Encontre os melhores produtos com os melhores preços</p>
+          <button onclick="showSection('produtos')" class="cta-button">
+            <i class="fas fa-shopping-bag"></i> Ver Produtos
+          </button>
+        </div>
+      </div>
+      
+      <div class="featured-section">
+        <h3>Produtos em Destaque</h3>
+        <div class="featured-products" id="featured-products">
+          <!-- Produtos em destaque serão carregados aqui -->
+        </div>
       </div>
     </section>
 
-    <section id="carrinho">
-      <h2>Carrinho de Compras</h2>
-      <ul id="cart-list"></ul>
-      <p>Total: R$ <span id="total">0.00</span></p>
-      <button onclick="finalizarCompra()">Finalizar Compra</button>
+    <!-- Seção Produtos -->
+    <section id="produtos" class="section">
+      <div class="products-header">
+        <h2>Nossos Produtos</h2>
+        <div class="filters">
+          <select id="category-filter" onchange="filterProducts()">
+            <option value="">Todas as Categorias</option>
+            <option value="roupas">Roupas</option>
+            <option value="acessorios">Acessórios</option>
+            <option value="calcados">Calçados</option>
+          </select>
+          <input type="range" id="price-filter" min="0" max="500" value="500" onchange="filterProducts()">
+          <span>Até R$ <span id="price-value">500</span></span>
+        </div>
+      </div>
+      
+      <div class="grid-produtos" id="product-list">
+        <!-- Os produtos serão carregados aqui -->
+      </div>
+      
+      <div class="product-count">
+        <span id="products-count">0 produtos encontrados</span>
+      </div>
+    </section>
+
+    <!-- Seção Sobre -->
+    <section id="sobre" class="section">
+      <div class="about-content">
+        <h2>Sobre Nossa Loja</h2>
+        <div class="about-grid">
+          <div class="about-text">
+            <p>Somos uma loja dedicada a oferecer produtos de alta qualidade com os melhores preços do mercado. Nossa missão é proporcionar uma experiência de compra excepcional para todos os nossos clientes.</p>
+            <div class="features">
+              <div class="feature">
+                <i class="fas fa-shipping-fast"></i>
+                <h4>Entrega Rápida</h4>
+                <p>Entregamos em todo o Brasil com rapidez e segurança</p>
+              </div>
+              <div class="feature">
+                <i class="fas fa-shield-alt"></i>
+                <h4>Compra Segura</h4>
+                <p>Seus dados estão protegidos com criptografia de ponta</p>
+              </div>
+              <div class="feature">
+                <i class="fas fa-headset"></i>
+                <h4>Suporte 24/7</h4>
+                <p>Atendimento ao cliente sempre disponível</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Seção Contato -->
+    <section id="contato" class="section">
+      <div class="contact-content">
+        <h2>Entre em Contato</h2>
+        <div class="contact-grid">
+          <div class="contact-info">
+            <div class="contact-item">
+              <i class="fas fa-map-marker-alt"></i>
+              <div>
+                <h4>Endereço</h4>
+                <p>Rua das Compras, 123<br>Centro, São Paulo - SP</p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <i class="fas fa-phone"></i>
+              <div>
+                <h4>Telefone</h4>
+                <p>(11) 9999-8888</p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <i class="fas fa-envelope"></i>
+              <div>
+                <h4>E-mail</h4>
+                <p>contato@minhaloja.com</p>
+              </div>
+            </div>
+          </div>
+          
+          <form class="contact-form" onsubmit="submitContactForm(event)">
+            <h3>Envie uma Mensagem</h3>
+            <input type="text" placeholder="Seu Nome" required>
+            <input type="email" placeholder="Seu E-mail" required>
+            <input type="text" placeholder="Assunto" required>
+            <textarea placeholder="Sua Mensagem" rows="5" required></textarea>
+            <button type="submit" class="btn-primary">
+              <i class="fas fa-paper-plane"></i> Enviar Mensagem
+            </button>
+          </form>
+        </div>
+      </div>
     </section>
   </main>
 
+  <!-- Modal do Carrinho -->
+  <div id="cart-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeCartModal()">&times;</span>
+      <h2><i class="fas fa-shopping-cart"></i> Seu Carrinho</h2>
+      <div id="cart-items-modal">
+        <!-- Itens do carrinho serão carregados aqui -->
+      </div>
+      <div class="cart-footer">
+        <div class="cart-total">
+          <strong>Total: R$ <span id="cart-total-modal">0.00</span></strong>
+        </div>
+        <div class="cart-actions">
+          <button onclick="proceedToCheckout()" class="btn-primary">
+            <i class="fas fa-credit-card"></i> Finalizar Compra
+          </button>
+          <button onclick="clearCart()" class="btn-secondary">
+            <i class="fas fa-trash"></i> Limpar Carrinho
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Cadastro -->
+  <div id="register-options-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeRegisterModal()">&times;</span>
+      <h2>Escolha o Tipo de Cadastro</h2>
+      <div class="register-options">
+        <button class="register-option-btn" onclick="openClientRegister()">
+          <i class="fas fa-user"></i>
+          <h3>Cadastro de Cliente</h3>
+          <p>Para comprar produtos em nossa loja</p>
+        </button>
+        <button class="register-option-btn" onclick="openAdminRegister()">
+          <i class="fas fa-user-cog"></i>
+          <h3>Cadastro de Administrador</h3>
+          <p>Para gerenciar a loja</p>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="register-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeRegisterModal()">&times;</span>
+      <h2 id="register-title">Cadastro</h2>
+      <form id="register-form" onsubmit="handleRegister(event)">
+        <input type="text" placeholder="Nome Completo" name="name" required>
+        <input type="email" placeholder="E-mail" name="email" required>
+        <input type="password" placeholder="Senha (min. 6 caracteres)" name="password" required minlength="6">
+        <input type="password" placeholder="Confirmar Senha" name="confirmPassword" required>
+        <input type="tel" placeholder="Telefone" name="phone">
+        <div id="admin-fields" style="display: none;">
+          <input type="password" placeholder="Código de Administrador" name="adminCode">
+        </div>
+        <button type="submit" class="btn-primary">
+          <i class="fas fa-user-plus"></i> Cadastrar
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de Detalhes do Produto -->
+  <div id="product-modal" class="modal">
+    <div class="modal-content large">
+      <span class="close" onclick="closeProductModal()">&times;</span>
+      <div id="product-details">
+        <!-- Detalhes do produto serão carregados aqui -->
+      </div>
+    </div>
+  </div>
+
   <footer>
-    <p>&copy; <span id="ano"></span> Minha Loja. Todos os direitos reservados.</p>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Minha Loja</h3>
+        <p>Sua loja online de confiança com produtos de qualidade e os melhores preços.</p>
+      </div>
+      <div class="footer-section">
+        <h3>Links Úteis</h3>
+        <ul>
+          <li><a href="#produtos" onclick="showSection('produtos')">Produtos</a></li>
+          <li><a href="#sobre" onclick="showSection('sobre')">Sobre</a></li>
+          <li><a href="#contato" onclick="showSection('contato')">Contato</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>Atendimento</h3>
+        <p><i class="fas fa-phone"></i> (11) 9999-8888</p>
+        <p><i class="fas fa-envelope"></i> contato@minhaloja.com</p>
+        <p><i class="fas fa-clock"></i> Seg-Sex: 9h-18h</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; <span id="ano"></span> Minha Loja. Todos os direitos reservados.</p>
+    </div>
   </footer>
 
   <script src="script.js"></script>
