@@ -237,14 +237,19 @@
   <!-- Modal do Carrinho -->
   <div id="cart-modal" class="modal">
     <div class="modal-content">
-      <span class="close" onclick="closeCartModal()">&times;</span>
-      <h2><i class="fas fa-shopping-cart"></i> Seu Carrinho</h2>
-      <div id="cart-items-modal">
-        <!-- Itens do carrinho serão carregados aqui -->
+      <div class="modal-header">
+        <h2><i class="fas fa-shopping-cart"></i> Seu Carrinho</h2>
+        <span class="close" onclick="closeCartModal()">&times;</span>
       </div>
-      <div class="cart-footer">
+      <div class="modal-body">
+        <div id="cart-items-modal">
+          <!-- Itens do carrinho serão carregados aqui -->
+        </div>
+      </div>
+      <div class="modal-footer">
         <div class="cart-total">
-          <strong>Total: R$ <span id="cart-total-modal">0.00</span></strong>
+          <span>Total:</span>
+          <span>R$ <span id="cart-total-modal">0.00</span></span>
         </div>
         <div class="cart-actions">
           <button onclick="proceedToCheckout()" class="btn-primary">
