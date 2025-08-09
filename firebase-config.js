@@ -75,12 +75,16 @@ export {
 export class FirebaseService {
   
   constructor() {
-    this.initializeDatabase();
+    console.log('🔄 Inicializando FirebaseService...');
+    // Remover inicialização automática do database para evitar problemas
+    // this.initializeDatabase();
   }
 
-  // Inicializar estruturas do banco de dados
+  // Inicializar estruturas do banco de dados (chamada manual)
   async initializeDatabase() {
     try {
+      console.log('🔄 Inicializando estruturas do banco de dados...');
+      
       // Verificar e criar coleções se necessário
       await this.ensureCollectionExists('users');
       await this.ensureCollectionExists('products');
@@ -91,8 +95,10 @@ export class FirebaseService {
       await this.createSampleDataIfNeeded();
       
       console.log('📂 Estruturas do banco de dados inicializadas com sucesso!');
+      return { success: true };
     } catch (error) {
       console.error('❌ Erro ao inicializar banco de dados:', error);
+      return { success: false, error: error.message };
     }
   }
 
@@ -840,8 +846,17 @@ export class FirebaseService {
   }
 }
 
-// Create and export a singleton instance
-export const firebaseService = new FirebaseService();
+// Create and export a singleton instance with error handling
+let firebaseServiceInstance;
+try {
+  firebaseServiceInstance = new FirebaseService();
+  console.log('✅ FirebaseService instanciado com sucesso');
+} catch (error) {
+  console.error('❌ Erro ao instanciar FirebaseService:', error);
+  firebaseServiceInstance = null;
+}
+
+export const firebaseService = firebaseServiceInstance;
 
 // Helper function to get current user
 export const getCurrentUser = () => auth.currentUser;

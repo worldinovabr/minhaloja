@@ -394,6 +394,44 @@
     </div>
   </footer>
 
+  <!-- Botão de teste temporário -->
+  <div style="position: fixed; top: 10px; right: 10px; z-index: 9999;">
+    <button onclick="testFirebaseConnection()" style="background: #ff6b6b; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">
+      🔥 Teste Firebase
+    </button>
+  </div>
+
   <script src="script.js"></script>
+  
+  <script>
+    // Função de teste do Firebase
+    window.testFirebaseConnection = async function() {
+      console.log('🔄 Testando Firebase...');
+      
+      try {
+        const firebaseModule = await import('./firebase-config.js');
+        console.log('✅ Firebase importado');
+        
+        if (firebaseModule.firebaseService) {
+          console.log('✅ FirebaseService disponível');
+          
+          const testEmail = `teste${Date.now()}@exemplo.com`;
+          const result = await firebaseModule.firebaseService.signUp(testEmail, '123456', {
+            nome: 'Teste User',
+            tipo: 'cliente'
+          });
+          
+          console.log('📊 Resultado:', result);
+          alert(result.success ? '✅ Firebase OK!' : `❌ Erro: ${result.error}`);
+        } else {
+          console.error('❌ FirebaseService não encontrado');
+          alert('❌ FirebaseService não encontrado');
+        }
+      } catch (error) {
+        console.error('❌ Erro:', error);
+        alert(`❌ Erro: ${error.message}`);
+      }
+    };
+  </script>
 </body>
 </html>

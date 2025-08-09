@@ -1148,20 +1148,34 @@ async function registerUser(data) {
       };
     }
     
-    // Importar Firebase Service com tratamento de erro
+    // Importar Firebase Service com tratamento de erro melhorado
     let firebaseService;
     try {
+      AuthLogger.info('Tentando importar Firebase...');
       const firebaseModule = await import('./firebase-config.js');
+      AuthLogger.info('Firebase importado com sucesso');
+      
       firebaseService = firebaseModule.firebaseService;
       
       if (!firebaseService) {
-        throw new Error('firebaseService não foi importado corretamente');
+        AuthLogger.error('firebaseService é null ou undefined');
+        throw new Error('firebaseService não foi inicializado corretamente');
       }
+      
+      // Verificar se o método signUp existe
+      if (typeof firebaseService.signUp !== 'function') {
+        AuthLogger.error('Método signUp não encontrado no firebaseService');
+        throw new Error('Método signUp não está disponível');
+      }
+      
+      AuthLogger.info('FirebaseService validado e pronto para uso');
+      
     } catch (importError) {
-      AuthLogger.error('Erro ao importar Firebase:', importError);
+      AuthLogger.error('Erro detalhado ao importar Firebase:', importError);
+      console.error('Stack trace:', importError.stack);
       return {
         success: false,
-        error: 'Erro ao conectar com o sistema de autenticação'
+        error: 'Sistema de autenticação temporariamente indisponível. Tente novamente.'
       };
     }
     
@@ -1188,10 +1202,11 @@ async function registerUser(data) {
     }
     
   } catch (error) {
-    AuthLogger.error('Erro na função registerUser:', error);
+    AuthLogger.error('Erro geral na função registerUser:', error);
+    console.error('Stack trace completo:', error.stack);
     return {
       success: false,
-      error: 'Erro interno do sistema. Tente novamente.'
+      error: 'Erro interno do sistema. Tente novamente em alguns minutos.'
     };
   }
 }
