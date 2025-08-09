@@ -1301,7 +1301,7 @@ a:focus {
 /* Login Modal Styles */
 .modal-divider {
   text-align: center;
-  margin: 1.5rem 0;
+  margin: 2rem 0;
   position: relative;
 }
 
@@ -1312,52 +1312,145 @@ a:focus {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(138, 129, 235, 0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(138, 129, 235, 0.4), transparent);
   z-index: 1;
 }
 
 .modal-divider span {
-  background: var(--card-bg);
-  padding: 0 1rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 0.5rem 1.5rem;
   color: var(--text-light);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 500;
   position: relative;
   z-index: 2;
+  border-radius: 20px;
+  border: 1px solid rgba(138, 129, 235, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .register-link,
 .forgot-password {
   text-align: center;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-radius: 12px;
+  background: rgba(138, 129, 235, 0.05);
+  border: 1px solid rgba(138, 129, 235, 0.1);
 }
 
 .register-link p {
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.75rem 0;
   color: var(--text-light);
   font-size: 0.95rem;
+  font-weight: 500;
 }
 
 .btn-link {
-  background: none;
-  border: none;
+  background: linear-gradient(135deg, rgba(138, 129, 235, 0.1), rgba(138, 129, 235, 0.05));
+  border: 2px solid rgba(138, 129, 235, 0.3);
   color: var(--primary-color);
   cursor: pointer;
-  font-size: 0.95rem;
-  padding: 0.5rem;
-  border-radius: 8px;
-  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
+  min-width: 140px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
 .btn-link:hover {
-  background: rgba(138, 129, 235, 0.1);
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, var(--primary-color), rgba(138, 129, 235, 0.9));
+  color: white;
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(138, 129, 235, 0.3);
+}
+
+.btn-link:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 15px rgba(138, 129, 235, 0.2);
 }
 
 .forgot-password {
-  border-top: 1px solid var(--border-color);
-  padding-top: 1rem;
-  margin-top: 1.5rem;
+  border-top: none;
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.1);
+  margin-top: 1rem;
+}
+
+.forgot-password .btn-link {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #dc2626;
+  font-size: 0.85rem;
+  min-width: 160px;
+}
+
+.forgot-password .btn-link:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  border-color: #dc2626;
+  color: white;
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+}
+
+/* Responsive Styles for Login Modal */
+@media (max-width: 768px) {
+  .modal-divider {
+    margin: 1.5rem 0;
+  }
+  
+  .modal-divider span {
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem;
+  }
+  
+  .register-link,
+  .forgot-password {
+    margin-top: 1rem;
+    padding: 0.875rem;
+  }
+  
+  .btn-link {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.85rem;
+    min-width: 120px;
+  }
+  
+  .forgot-password .btn-link {
+    min-width: 140px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-divider {
+    margin: 1rem 0;
+  }
+  
+  .register-link,
+  .forgot-password {
+    padding: 0.75rem;
+    border-radius: 10px;
+  }
+  
+  .btn-link {
+    padding: 0.875rem 1rem;
+    font-size: 0.8rem;
+    min-width: 100px;
+    width: 100%;
+  }
+  
+  .forgot-password .btn-link {
+    min-width: auto;
+    width: 100%;
+  }
 }
