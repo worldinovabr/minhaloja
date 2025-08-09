@@ -32,128 +32,158 @@
 <body>
   <!-- Header Principal -->
   <header>
-    <div class="header-content">
-      <div class="logo-section">
-        <h1 onclick="showSection('home')" id="store-name">Minha Loja</h1>
-      </div>
-      
-      <nav class="nav-bar">
-        <a href="#home" onclick="showSection('home')" class="nav-link active">
-          <i class="fas fa-home"></i> Início
-        </a>
-        <a href="#produtos" onclick="showSection('produtos')" class="nav-link">
-          <i class="fas fa-shopping-bag"></i> Produtos
-        </a>
-        <a href="#sobre" onclick="showSection('sobre')" class="nav-link">
-          <i class="fas fa-info-circle"></i> Sobre
-        </a>
-        <a href="#contato" onclick="showSection('contato')" class="nav-link">
-          <i class="fas fa-envelope"></i> Contato
-        </a>
-      </nav>
-      
-      <!-- Barra de Busca -->
-      <div class="search-section">
-        <div class="search-container">
-          <input type="text" id="search-input" placeholder="Buscar produtos..." onkeypress="handleSearchKeypress(event)">
-          <button onclick="searchProducts()" class="search-btn">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo-section">
+          <h1 onclick="showSection('home')" id="store-name">
+            <i class="fas fa-store"></i>
+            Minha Loja
+          </h1>
+        </div>
+        
+        <!-- Mobile Menu Toggle -->
+        <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        
+        <!-- Navigation -->
+        <nav class="navbar" id="navbar">
+          <ul class="nav-links">
+            <li><a href="#home" class="nav-link active" onclick="showSection('home')">
+              <i class="fas fa-home"></i>
+              <span>Home</span>
+            </a></li>
+            <li><a href="#produtos" class="nav-link" onclick="showSection('produtos')">
+              <i class="fas fa-shopping-bag"></i>
+              <span>Produtos</span>
+            </a></li>
+            <li><a href="#sobre" class="nav-link" onclick="showSection('sobre')">
+              <i class="fas fa-info-circle"></i>
+              <span>Sobre</span>
+            </a></li>
+            <li><a href="#contato" class="nav-link" onclick="showSection('contato')">
+              <i class="fas fa-envelope"></i>
+              <span>Contato</span>
+            </a></li>
+          </ul>
+        </nav>
+        
+        <!-- Search Section -->
+        <div class="search-section">
+          <div class="search-container">
             <i class="fas fa-search"></i>
+            <input type="text" id="search-input" placeholder="Buscar produtos..." 
+                   onkeypress="handleSearchKeypress(event)">
+          </div>
+          <button class="search-btn" onclick="searchProducts()">
+            <i class="fas fa-search"></i>
+            <span class="btn-text">Buscar</span>
           </button>
         </div>
-      </div>
-      
-      <!-- Seção do Usuário -->
-      <div class="user-section">
-        <div class="cart-info" onclick="showCartModal()">
-          <i class="fas fa-shopping-cart"></i>
-          <span class="cart-count" id="cart-count">0</span>
-        </div>
         
-        <div class="user-info">
-          <i class="fas fa-user"></i>
-          <span id="user-name">Visitante</span>
-        </div>
-        
-        <div class="auth-buttons">
-          <button class="btn-login" onclick="window.location.href='login.html'">
-            <i class="fas fa-sign-in-alt"></i> Login
-          </button>
-          <button class="btn-register" onclick="openRegisterModal()">
-            <i class="fas fa-user-plus"></i> Cadastrar
+        <!-- User Section -->
+        <div class="user-section">
+          <div class="auth-buttons">
+            <button class="btn-login" onclick="showLoginModal()">
+              <i class="fas fa-sign-in-alt"></i>
+              <span>Entrar</span>
+            </button>
+            <button class="btn-register" onclick="openRegisterModal()">
+              <i class="fas fa-user-plus"></i>
+              <span>Cadastrar</span>
+            </button>
+          </div>
+          
+          <div class="user-info">
+            <i class="fas fa-user-circle"></i>
+            <span id="user-name">Usuário</span>
+          </div>
+          
+          <button class="cart-icon" onclick="showCartModal()" aria-label="Carrinho de compras">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-count" id="cart-count">0</span>
           </button>
         </div>
       </div>
     </div>
   </header>
 
-  <main>
+  <main id="main-content">
     <!-- Seção Home -->
     <section id="home" class="section active">
-      <div class="hero-banner">
-        <div class="banner-content">
-          <h2>Bem-vindo à Nossa Loja</h2>
-          <p>Encontre os melhores produtos com os melhores preços</p>
-          <button onclick="showSection('produtos')" class="cta-button">
-            <i class="fas fa-shopping-bag"></i> Ver Produtos
-          </button>
+      <div class="container">
+        <div class="hero">
+          <div class="hero-content">
+            <h1>Bem-vindo à Nossa Loja</h1>
+            <p>Descubra os melhores produtos com as melhores ofertas. Qualidade garantida e entrega rápida para todo o Brasil.</p>
+            <button onclick="showSection('produtos')" class="cta-button pulse">
+              <i class="fas fa-shopping-bag"></i> Ver Produtos
+            </button>
+          </div>
         </div>
-      </div>
-      
-      <div class="featured-section">
-        <h3>Produtos em Destaque</h3>
-        <div class="featured-products" id="featured-products">
-          <!-- Produtos em destaque serão carregados aqui -->
+        
+        <div class="featured-section">
+          <h2>Produtos em Destaque</h2>
+          <div class="featured-products" id="featured-products">
+            <!-- Produtos em destaque serão carregados aqui -->
+          </div>
         </div>
       </div>
     </section>
 
     <!-- Seção Produtos -->
     <section id="produtos" class="section">
-      <div class="products-header">
-        <h2>Nossos Produtos</h2>
-        <div class="filters">
-          <select id="category-filter" onchange="filterProducts()">
-            <option value="">Todas as Categorias</option>
-            <option value="roupas">Roupas</option>
-            <option value="acessorios">Acessórios</option>
-            <option value="calcados">Calçados</option>
-          </select>
-          <input type="range" id="price-filter" min="0" max="500" value="500" onchange="filterProducts()">
-          <span>Até R$ <span id="price-value">500</span></span>
+      <div class="container">
+        <div class="products-header">
+          <h2>Nossos Produtos</h2>
+          <div class="filters">
+            <select id="category-filter" onchange="filterProducts()">
+              <option value="">Todas as Categorias</option>
+              <option value="roupas">Roupas</option>
+              <option value="acessorios">Acessórios</option>
+              <option value="calcados">Calçados</option>
+            </select>
+            <input type="range" id="price-filter" min="0" max="500" value="500" onchange="filterProducts()">
+            <span>Até R$ <span id="price-value">500</span></span>
+          </div>
         </div>
-      </div>
-      
-      <div class="grid-produtos" id="product-list">
-        <!-- Os produtos serão carregados aqui -->
-      </div>
-      
-      <div class="product-count">
-        <span id="products-count">0 produtos encontrados</span>
+        
+        <div class="products-grid" id="product-list">
+          <!-- Os produtos serão carregados aqui -->
+        </div>
+        
+        <div class="product-count">
+          <span id="products-count">0 produtos encontrados</span>
+        </div>
       </div>
     </section>
 
     <!-- Seção Sobre -->
     <section id="sobre" class="section">
-      <div class="about-content">
-        <h2>Sobre Nossa Loja</h2>
-        <div class="about-grid">
-          <div class="about-text">
-            <p>Somos uma loja dedicada a oferecer produtos de alta qualidade com os melhores preços do mercado. Nossa missão é proporcionar uma experiência de compra excepcional para todos os nossos clientes.</p>
-            <div class="features">
-              <div class="feature">
-                <i class="fas fa-shipping-fast"></i>
-                <h4>Entrega Rápida</h4>
-                <p>Entregamos em todo o Brasil com rapidez e segurança</p>
-              </div>
-              <div class="feature">
-                <i class="fas fa-shield-alt"></i>
-                <h4>Compra Segura</h4>
-                <p>Seus dados estão protegidos com criptografia de ponta</p>
-              </div>
-              <div class="feature">
-                <i class="fas fa-headset"></i>
-                <h4>Suporte 24/7</h4>
-                <p>Atendimento ao cliente sempre disponível</p>
+      <div class="container">
+        <div class="about-content">
+          <h2>Sobre Nossa Loja</h2>
+          <div class="about-grid">
+            <div class="about-text">
+              <p>Somos uma loja dedicada a oferecer produtos de alta qualidade com os melhores preços do mercado. Nossa missão é proporcionar uma experiência de compra excepcional para todos os nossos clientes.</p>
+              <div class="features">
+                <div class="feature">
+                  <i class="fas fa-shipping-fast"></i>
+                  <h4>Entrega Rápida</h4>
+                  <p>Entregamos em todo o Brasil com rapidez e segurança</p>
+                </div>
+                <div class="feature">
+                  <i class="fas fa-shield-alt"></i>
+                  <h4>Compra Segura</h4>
+                  <p>Seus dados estão protegidos com criptografia de ponta</p>
+                </div>
+                <div class="feature">
+                  <i class="fas fa-headset"></i>
+                  <h4>Suporte 24/7</h4>
+                  <p>Atendimento ao cliente sempre disponível</p>
+                </div>
               </div>
             </div>
           </div>
@@ -162,44 +192,47 @@
     </section>
 
     <!-- Seção Contato -->
+        <!-- Seção Contato -->
     <section id="contato" class="section">
-      <div class="contact-content">
-        <h2>Entre em Contato</h2>
-        <div class="contact-grid">
-          <div class="contact-info">
-            <div class="contact-item">
-              <i class="fas fa-map-marker-alt"></i>
-              <div>
-                <h4>Endereço</h4>
-                <p>Rua das Compras, 123<br>Centro, São Paulo - SP</p>
+      <div class="container">
+        <div class="contact-content">
+          <h2>Entre em Contato</h2>
+          <div class="contact-grid">
+            <div class="contact-info">
+              <div class="contact-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <div>
+                  <h4>Endereço</h4>
+                  <p>Rua das Compras, 123<br>Centro, São Paulo - SP</p>
+                </div>
+              </div>
+              <div class="contact-item">
+                <i class="fas fa-phone"></i>
+                <div>
+                  <h4>Telefone</h4>
+                  <p>(11) 9999-8888</p>
+                </div>
+              </div>
+              <div class="contact-item">
+                <i class="fas fa-envelope"></i>
+                <div>
+                  <h4>E-mail</h4>
+                  <p>contato@minhaloja.com</p>
+                </div>
               </div>
             </div>
-            <div class="contact-item">
-              <i class="fas fa-phone"></i>
-              <div>
-                <h4>Telefone</h4>
-                <p>(11) 9999-8888</p>
-              </div>
-            </div>
-            <div class="contact-item">
-              <i class="fas fa-envelope"></i>
-              <div>
-                <h4>E-mail</h4>
-                <p>contato@minhaloja.com</p>
-              </div>
-            </div>
+            
+            <form class="contact-form" onsubmit="submitContactForm(event)">
+              <h3>Envie uma Mensagem</h3>
+              <input type="text" placeholder="Seu Nome" required>
+              <input type="email" placeholder="Seu E-mail" required>
+              <input type="text" placeholder="Assunto" required>
+              <textarea placeholder="Sua Mensagem" rows="5" required></textarea>
+              <button type="submit" class="btn-primary">
+                <i class="fas fa-paper-plane"></i> Enviar Mensagem
+              </button>
+            </form>
           </div>
-          
-          <form class="contact-form" onsubmit="submitContactForm(event)">
-            <h3>Envie uma Mensagem</h3>
-            <input type="text" placeholder="Seu Nome" required>
-            <input type="email" placeholder="Seu E-mail" required>
-            <input type="text" placeholder="Assunto" required>
-            <textarea placeholder="Sua Mensagem" rows="5" required></textarea>
-            <button type="submit" class="btn-primary">
-              <i class="fas fa-paper-plane"></i> Enviar Mensagem
-            </button>
-          </form>
         </div>
       </div>
     </section>
@@ -279,29 +312,31 @@
     </div>
   </div>
 
-  <footer>
-    <div class="footer-content">
-      <div class="footer-section">
-        <h3>Minha Loja</h3>
-        <p>Sua loja online de confiança com produtos de qualidade e os melhores preços.</p>
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>Minha Loja</h3>
+          <p>Sua loja online de confiança com produtos de qualidade e os melhores preços.</p>
+        </div>
+        <div class="footer-section">
+          <h3>Links Úteis</h3>
+          <ul>
+            <li><a href="#produtos" onclick="showSection('produtos')">Produtos</a></li>
+            <li><a href="#sobre" onclick="showSection('sobre')">Sobre</a></li>
+            <li><a href="#contato" onclick="showSection('contato')">Contato</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>Atendimento</h3>
+          <p><i class="fas fa-phone"></i> (11) 9999-8888</p>
+          <p><i class="fas fa-envelope"></i> contato@minhaloja.com</p>
+          <p><i class="fas fa-clock"></i> Seg-Sex: 9h-18h</p>
+        </div>
       </div>
-      <div class="footer-section">
-        <h3>Links Úteis</h3>
-        <ul>
-          <li><a href="#produtos" onclick="showSection('produtos')">Produtos</a></li>
-          <li><a href="#sobre" onclick="showSection('sobre')">Sobre</a></li>
-          <li><a href="#contato" onclick="showSection('contato')">Contato</a></li>
-        </ul>
+      <div class="footer-bottom">
+        <p>&copy; <span id="ano"></span> Minha Loja. Todos os direitos reservados.</p>
       </div>
-      <div class="footer-section">
-        <h3>Atendimento</h3>
-        <p><i class="fas fa-phone"></i> (11) 9999-8888</p>
-        <p><i class="fas fa-envelope"></i> contato@minhaloja.com</p>
-        <p><i class="fas fa-clock"></i> Seg-Sex: 9h-18h</p>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>&copy; <span id="ano"></span> Minha Loja. Todos os direitos reservados.</p>
     </div>
   </footer>
 
