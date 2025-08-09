@@ -74,7 +74,7 @@ const produtos = [
 // Carrinho de compras
 let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
 let currentFilter = { category: '', maxPrice: 500, search: '' };
-let registerType = 'client';
+let registerType = 'cliente';
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
@@ -1031,7 +1031,7 @@ function openClientRegister() {
   document.getElementById('register-title').textContent = 'Cadastro de Cliente';
   document.getElementById('admin-fields').style.display = 'none';
   document.getElementById('register-modal').style.display = 'block';
-  registerType = 'client';
+  registerType = 'cliente';
 }
 
 function openAdminRegister() {
@@ -1124,6 +1124,15 @@ async function registerUser(data) {
   try {
     AuthLogger.info('Iniciando processo de registro:', { email: data.email, tipo: registerType });
     
+    // Verificar se os dados estão corretos
+    if (!data.email || !data.password || !data.name) {
+      AuthLogger.error('Dados obrigatórios ausentes:', data);
+      return {
+        success: false,
+        error: 'Dados obrigatórios não preenchidos'
+      };
+    }
+    
     // Importar Firebase Service
     const { firebaseService } = await import('./firebase-config.js');
     
@@ -1142,6 +1151,7 @@ async function registerUser(data) {
         userData: userData
       };
     } else {
+      AuthLogger.error('Erro no Firebase signUp:', result.error);
       return {
         success: false,
         error: result.error
@@ -1149,6 +1159,7 @@ async function registerUser(data) {
     }
     
   } catch (error) {
+    AuthLogger.error('Erro na função registerUser:', error);
     return {
       success: false,
       error: AUTH_CONFIG.MESSAGES.CONNECTION_ERROR

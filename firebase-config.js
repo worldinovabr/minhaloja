@@ -333,9 +333,10 @@ export class FirebaseService {
 
       return { success: true, user: userCredential.user, userType: userData.tipo };
     } catch (error) {
+      console.error('Firebase signUp error:', error);
       return { 
         success: false, 
-        error: this.getAuthErrorMessage(error.code) 
+        error: this.getAuthErrorMessage(error.code) || error.message 
       };
     }
   }
