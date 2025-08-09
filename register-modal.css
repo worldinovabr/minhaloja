@@ -1,0 +1,117 @@
+/* Estilos para Modal de Cadastro */
+.register-options {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  margin: 2rem 0;
+  flex-wrap: wrap;
+}
+
+.register-option-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 15px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 200px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.register-option-btn:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.register-option-btn i {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.register-option-btn h3 {
+  margin: 1rem 0 0.5rem 0;
+  font-size: 1.3rem;
+}
+
+.register-option-btn p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.9rem;
+}
+
+#register-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+#register-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+#register-form input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+#register-form input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+#register-form small {
+  color: #666;
+  font-size: 0.8rem;
+  display: block;
+  margin-top: 0.3rem;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #666;
+}
+
+.login-link a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
+
+/* Responsividade para cadastro */
+@media (max-width: 768px) {
+  .register-options {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .register-option-btn {
+    min-width: 250px;
+    padding: 1.5rem;
+  }
+  
+  .auth-buttons {
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  
+  .btn-login, .btn-register {
+    font-size: 0.8rem !important;
+    padding: 0.4rem 0.8rem !important;
+  }
+}

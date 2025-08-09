@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="header-responsive.css">
     <link rel="stylesheet" href="cart-modal.css">
     <link rel="stylesheet" href="product-styles.css">
+    <link rel="stylesheet" href="register-modal.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
       <script type="module" src="firebase-config.js"></script>
@@ -50,9 +51,14 @@
           <span id="user-name">Visitante</span>
         </div>
         
-        <a href="login.html" class="btn-login" id="login-btn">
-          <i class="fas fa-sign-in-alt"></i> Login
-        </a>
+        <div class="auth-buttons">
+          <a href="login.html" class="btn-login" id="login-btn">
+            <i class="fas fa-sign-in-alt"></i> Login
+          </a>
+          <button class="btn-register" id="register-btn" onclick="openRegisterModal()">
+            <i class="fas fa-user-plus"></i> Cadastrar
+          </button>
+        </div>
       </div>
     </div>
   </header>
@@ -255,6 +261,76 @@
           <button onclick="clearCart()" class="btn-secondary">Limpar Carrinho</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal de Opções de Cadastro -->
+  <div id="register-options-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeRegisterOptionsModal()">&times;</span>
+      <h2>Escolha o Tipo de Cadastro</h2>
+      <div class="register-options">
+        <button class="register-option-btn" onclick="openClientRegister()">
+          <i class="fas fa-user"></i>
+          <h3>Cadastro de Cliente</h3>
+          <p>Para comprar produtos em nossa loja</p>
+        </button>
+        <button class="register-option-btn" onclick="openAdminRegister()">
+          <i class="fas fa-user-cog"></i>
+          <h3>Cadastro de Administrador</h3>
+          <p>Para gerenciar a loja (requer código)</p>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Cadastro -->
+  <div id="register-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeRegisterModal()">&times;</span>
+      <h2 id="register-title">Cadastro</h2>
+      <form id="register-form">
+        <div class="form-group">
+          <label for="register-name">Nome Completo:</label>
+          <input type="text" id="register-name" name="name" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="register-email">E-mail:</label>
+          <input type="email" id="register-email" name="email" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="register-password">Senha:</label>
+          <input type="password" id="register-password" name="password" required minlength="6">
+        </div>
+        
+        <div class="form-group">
+          <label for="register-confirm-password">Confirmar Senha:</label>
+          <input type="password" id="register-confirm-password" name="confirmPassword" required minlength="6">
+        </div>
+        
+        <div class="form-group" id="admin-code-group" style="display: none;">
+          <label for="admin-code">Código de Administrador:</label>
+          <input type="password" id="admin-code" name="adminCode" placeholder="Digite o código fornecido">
+          <small>*Necessário para cadastro como administrador</small>
+        </div>
+        
+        <div class="form-group">
+          <label for="register-phone">Telefone:</label>
+          <input type="tel" id="register-phone" name="phone">
+        </div>
+        
+        <div class="form-group">
+          <button type="submit" class="btn-primary" id="register-submit-btn">
+            <i class="fas fa-user-plus"></i> Cadastrar
+          </button>
+        </div>
+      </form>
+      
+      <p class="login-link">
+        Já tem uma conta? <a href="login.html">Faça login aqui</a>
+      </p>
     </div>
   </div>
 
@@ -2268,6 +2344,118 @@
       productManager.clearCart();
       authManager.showSuccess('Carrinho limpo com sucesso!');
     };
+
+    // Funções para o sistema de cadastro
+    window.openRegisterModal = function() {
+      document.getElementById('register-options-modal').style.display = 'block';
+    };
+
+    window.closeRegisterOptionsModal = function() {
+      document.getElementById('register-options-modal').style.display = 'none';
+    };
+
+    window.closeRegisterModal = function() {
+      document.getElementById('register-modal').style.display = 'none';
+      document.getElementById('register-form').reset();
+    };
+
+    window.openClientRegister = function() {
+      closeRegisterOptionsModal();
+      document.getElementById('register-title').textContent = 'Cadastro de Cliente';
+      document.getElementById('admin-code-group').style.display = 'none';
+      document.getElementById('admin-code').required = false;
+      document.getElementById('register-modal').style.display = 'block';
+      registerType = 'client';
+    };
+
+    window.openAdminRegister = function() {
+      closeRegisterOptionsModal();
+      document.getElementById('register-title').textContent = 'Cadastro de Administrador';
+      document.getElementById('admin-code-group').style.display = 'block';
+      document.getElementById('admin-code').required = true;
+      document.getElementById('register-modal').style.display = 'block';
+      registerType = 'admin';
+    };
+
+    // Variável global para tipo de registro
+    let registerType = 'client';
+
+    // Handler para formulário de cadastro
+    document.getElementById('register-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('register-submit-btn');
+      const originalText = submitBtn.innerHTML;
+      
+      try {
+        // Mostrar loading
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cadastrando...';
+        submitBtn.disabled = true;
+        
+        const formData = new FormData(e.target);
+        const name = formData.get('name');
+        const email = formData.get('email');
+        const password = formData.get('password');
+        const confirmPassword = formData.get('confirmPassword');
+        const phone = formData.get('phone');
+        const adminCode = formData.get('adminCode');
+        
+        // Validações
+        if (password !== confirmPassword) {
+          throw new Error('As senhas não coincidem');
+        }
+        
+        if (password.length < 6) {
+          throw new Error('A senha deve ter pelo menos 6 caracteres');
+        }
+        
+        if (registerType === 'admin' && adminCode !== 'ADMIN2024') {
+          throw new Error('Código de administrador inválido');
+        }
+        
+        // Registrar no Firebase
+        const result = await authManager.register(email, password, {
+          nome: name,
+          telefone: phone,
+          tipo: registerType,
+          adminCode: registerType === 'admin' ? adminCode : null
+        });
+        
+        if (result.success) {
+          authManager.showSuccess('Cadastro realizado com sucesso! Você pode fazer login agora.');
+          closeRegisterModal();
+          
+          // Opcional: redirecionar para login após 2 segundos
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 2000);
+        } else {
+          throw new Error(result.error || 'Erro ao realizar cadastro');
+        }
+        
+      } catch (error) {
+        console.error('Erro no cadastro:', error);
+        authManager.showError('Erro ao realizar cadastro: ' + error.message);
+      } finally {
+        // Restaurar botão
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    });
+
+    // Fechar modais quando clicar fora
+    window.addEventListener('click', function(e) {
+      const registerOptionsModal = document.getElementById('register-options-modal');
+      const registerModal = document.getElementById('register-modal');
+      
+      if (e.target === registerOptionsModal) {
+        closeRegisterOptionsModal();
+      }
+      
+      if (e.target === registerModal) {
+        closeRegisterModal();
+      }
+    });
   </script>
 </body>
 </html>
