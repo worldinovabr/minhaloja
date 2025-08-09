@@ -83,6 +83,356 @@ document.addEventListener('DOMContentLoaded', function() {
   renderizarProdutosDestaque();
   atualizarCarrinho();
   setupEventListeners();
+  setupIntersectionObserver();
+  setupServiceWorker();
+  addSkipLink();
+});
+
+// Adicionar link de acessibilidade
+function addSkipLink() {
+  const skipLink = document.createElement('a');
+  skipLink.href = '#main-content';
+  skipLink.className = 'skip-link';
+  skipLink.textContent = 'Pular para o conteúdo principal';
+  document.body.insertBefore(skipLink, document.body.firstChild);
+}
+
+// Intersection Observer para animações suaves
+function setupIntersectionObserver() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('fade-in');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  });
+
+  // Observar elementos que devem animar
+  const animatedElements = document.querySelectorAll('.product-card, .feature-card, .hero');
+  animatedElements.forEach(el => observer.observe(el));
+}
+
+// Service Worker para cache (PWA básico)
+function setupServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => console.log('SW registered'))
+        .catch(error => console.log('SW registration failed'));
+    });
+  }
+}
+
+// Função para toggle do menu mobile com melhor acessibilidade
+function toggleMobileMenu() {
+  const navbar = document.getElementById('navbar');
+  const toggle = document.querySelector('.mobile-menu-toggle');
+  
+  if (navbar && toggle) {
+    const isOpen = navbar.classList.contains('mobile-open');
+    
+    navbar.classList.toggle('mobile-open');
+    toggle.classList.toggle('active');
+    
+    // Acessibilidade
+    toggle.setAttribute('aria-expanded', !isOpen);
+    navbar.setAttribute('aria-hidden', isOpen);
+    
+    // Focar no primeiro link quando abrir
+    if (!isOpen) {
+      const firstLink = navbar.querySelector('.nav-link');
+      setTimeout(() => firstLink?.focus(), 300);
+    }
+    
+    // Prevenir scroll do body quando menu estiver aberto
+    document.body.style.overflow = !isOpen ? 'hidden' : '';
+  }
+}
+
+// Melhorar função de busca com debounce
+let searchTimeout;
+function searchProducts() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    const searchInput = document.getElementById('search-input');
+    currentFilter.search = searchInput?.value || '';
+    renderizarProdutos();
+    showSection('produtos');
+    
+    // Analytics fictício
+    if (currentFilter.search) {
+      console.log('Busca realizada:', currentFilter.search);
+    }
+  }, 300);
+}
+
+// Função melhorada para adicionar ao carrinho com feedback visual
+function adicionarAoCarrinho(id) {
+  const produto = produtos.find(p => p.id === id);
+  const button = event.target.closest('.btn-add-cart');
+  
+  if (!produto || produto.estoque === 0) {
+    showNotification('Produto indisponível', 'error');
+    return;
+  }
+  
+  // Feedback visual no botão
+  if (button) {
+    button.classList.add('btn-loading');
+    button.innerHTML = '<span class="loading"></span>Adicionando...';
+  }
+  
+  setTimeout(() => {
+    const itemExistente = carrinho.find(item => item.id === id);
+    
+    if (itemExistente) {
+      if (itemExistente.quantity >= produto.estoque) {
+        showNotification('Estoque insuficiente', 'error');
+        resetButton(button, id);
+        return;
+      }
+      itemExistente.quantity += 1;
+    } else {
+      const precoFinal = produto.promocao ? 
+        produto.preco * (1 - produto.desconto / 100) : 
+        produto.preco;
+      
+      carrinho.push({
+        id: produto.id,
+        nome: produto.nome,
+        preco: precoFinal,
+        imagem: produto.imagem,
+        quantity: 1,
+        estoque: produto.estoque
+      });
+    }
+    
+    salvarCarrinho();
+    atualizarCarrinho();
+    showNotification(`${produto.nome} adicionado ao carrinho!`, 'success');
+    
+    // Animação no ícone do carrinho
+    const cartIcon = document.querySelector('.cart-icon');
+    if (cartIcon) {
+      cartIcon.classList.add('bounce-in');
+      setTimeout(() => cartIcon.classList.remove('bounce-in'), 600);
+    }
+    
+    resetButton(button, id);
+  }, 800);
+}
+
+function resetButton(button, productId) {
+  if (button) {
+    button.classList.remove('btn-loading');
+    button.innerHTML = `
+      <i class="fas fa-shopping-cart"></i>
+      Adicionar ao Carrinho
+    `;
+  }
+}
+
+// Melhorar sistema de navegação com história
+function showSection(sectionId) {
+  // Atualizar URL sem recarregar página
+  history.pushState({section: sectionId}, '', `#${sectionId}`);
+  
+  document.querySelectorAll('.section').forEach(section => {
+    section.classList.remove('active');
+  });
+  
+  const targetSection = document.getElementById(sectionId);
+  if (targetSection) {
+    targetSection.classList.add('active');
+    targetSection.classList.add('slide-up');
+    
+    // Scroll suave para o topo da seção
+    targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  
+  // Atualizar navegação ativa
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.classList.remove('active');
+    if (link.getAttribute('href') === `#${sectionId}`) {
+      link.classList.add('active');
+    }
+  });
+  
+  // Fechar menu mobile se estiver aberto
+  const navbar = document.getElementById('navbar');
+  const toggle = document.querySelector('.mobile-menu-toggle');
+  if (navbar?.classList.contains('mobile-open')) {
+    navbar.classList.remove('mobile-open');
+    toggle?.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+}
+
+// Navegação por histórico do browser
+window.addEventListener('popstate', (event) => {
+  const section = event.state?.section || 'home';
+  showSection(section);
+});
+
+// Validação de formulário melhorada
+function validateForm(formData, formType = 'contact') {
+  const errors = [];
+  
+  if (formType === 'contact') {
+    if (!formData.get('name')?.trim()) {
+      errors.push({field: 'name', message: 'Nome é obrigatório'});
+    }
+    
+    if (!formData.get('email')?.trim()) {
+      errors.push({field: 'email', message: 'Email é obrigatório'});
+    } else if (!/\S+@\S+\.\S+/.test(formData.get('email'))) {
+      errors.push({field: 'email', message: 'Email inválido'});
+    }
+    
+    if (!formData.get('message')?.trim()) {
+      errors.push({field: 'message', message: 'Mensagem é obrigatória'});
+    }
+  }
+  
+  return errors;
+}
+
+// Função melhorada para formulário de contato
+function submitContactForm(event) {
+  event.preventDefault();
+  
+  const form = event.target;
+  const formData = new FormData(form);
+  const errors = validateForm(formData, 'contact');
+  
+  // Limpar erros anteriores
+  form.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+  form.querySelectorAll('.error-message').forEach(el => el.remove());
+  
+  if (errors.length > 0) {
+    errors.forEach(error => {
+      const field = form.querySelector(`[name="${error.field}"]`);
+      if (field) {
+        field.classList.add('error');
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'error-message';
+        errorMsg.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${error.message}`;
+        field.parentNode.appendChild(errorMsg);
+      }
+    });
+    showNotification('Por favor, corrija os erros no formulário', 'error');
+    return;
+  }
+  
+  // Simular envio
+  const submitBtn = form.querySelector('button[type="submit"]');
+  submitBtn.classList.add('btn-loading');
+  submitBtn.innerHTML = '<span class="loading"></span>Enviando...';
+  
+  setTimeout(() => {
+    showNotification('Mensagem enviada com sucesso! Retornaremos em breve.', 'success');
+    form.reset();
+    submitBtn.classList.remove('btn-loading');
+    submitBtn.innerHTML = 'Enviar Mensagem';
+  }, 2000);
+}
+
+// Sistema de notificações melhorado com queue
+let notificationQueue = [];
+let isShowingNotification = false;
+
+function showNotification(message, type = 'info') {
+  notificationQueue.push({message, type});
+  
+  if (!isShowingNotification) {
+    processNotificationQueue();
+  }
+}
+
+function processNotificationQueue() {
+  if (notificationQueue.length === 0) {
+    isShowingNotification = false;
+    return;
+  }
+  
+  isShowingNotification = true;
+  const {message, type} = notificationQueue.shift();
+  
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.innerHTML = `
+    <i class="fas ${getNotificationIcon(type)}"></i>
+    <span>${message}</span>
+    <button class="notification-close" onclick="closeNotification(this.parentElement)">
+      <i class="fas fa-times"></i>
+    </button>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.classList.add('show');
+  }, 100);
+  
+  setTimeout(() => {
+    closeNotification(notification);
+  }, 4000);
+}
+
+function closeNotification(notification) {
+  notification.classList.remove('show');
+  setTimeout(() => {
+    if (notification.parentNode) {
+      document.body.removeChild(notification);
+    }
+    // Processar próxima notificação
+    setTimeout(processNotificationQueue, 200);
+  }, 300);
+}
+
+// Melhorar performance com lazy loading de imagens
+function setupLazyLoading() {
+  const images = document.querySelectorAll('img[data-src]');
+  
+  const imageObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        img.src = img.dataset.src;
+        img.classList.remove('lazy');
+        imageObserver.unobserve(img);
+      }
+    });
+  });
+  
+  images.forEach(img => imageObserver.observe(img));
+}
+
+// Adicionar suporte a atalhos de teclado
+document.addEventListener('keydown', (event) => {
+  // ESC para fechar modais
+  if (event.key === 'Escape') {
+    closeAllModals();
+    
+    // Fechar menu mobile
+    const navbar = document.getElementById('navbar');
+    const toggle = document.querySelector('.mobile-menu-toggle');
+    if (navbar?.classList.contains('mobile-open')) {
+      navbar.classList.remove('mobile-open');
+      toggle?.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  }
+  
+  // Ctrl/Cmd + K para focar na busca
+  if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+    event.preventDefault();
+    document.getElementById('search-input')?.focus();
+  }
 });
 
 // Event Listeners
@@ -101,6 +451,13 @@ function setupEventListeners() {
       e.preventDefault();
       document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
       this.classList.add('active');
+      // Fechar menu mobile se estiver aberto
+      const navbar = document.getElementById('navbar');
+      const toggle = document.querySelector('.mobile-menu-toggle');
+      if (navbar && navbar.classList.contains('mobile-open')) {
+        navbar.classList.remove('mobile-open');
+        toggle.classList.remove('active');
+      }
     });
   });
 
@@ -110,6 +467,41 @@ function setupEventListeners() {
       closeAllModals();
     }
   });
+
+  // Fechar menu mobile ao clicar fora
+  document.addEventListener('click', function(e) {
+    const navbar = document.getElementById('navbar');
+    const toggle = document.querySelector('.mobile-menu-toggle');
+    const isClickInsideNav = navbar && navbar.contains(e.target);
+    const isClickOnToggle = toggle && toggle.contains(e.target);
+    
+    if (!isClickInsideNav && !isClickOnToggle && navbar && navbar.classList.contains('mobile-open')) {
+      navbar.classList.remove('mobile-open');
+      toggle.classList.remove('active');
+    }
+  });
+
+  // Redimensionamento da janela
+  window.addEventListener('resize', function() {
+    const navbar = document.getElementById('navbar');
+    const toggle = document.querySelector('.mobile-menu-toggle');
+    
+    if (window.innerWidth > 768 && navbar && navbar.classList.contains('mobile-open')) {
+      navbar.classList.remove('mobile-open');
+      toggle.classList.remove('active');
+    }
+  });
+}
+
+// Função para toggle do menu mobile
+function toggleMobileMenu() {
+  const navbar = document.getElementById('navbar');
+  const toggle = document.querySelector('.mobile-menu-toggle');
+  
+  if (navbar && toggle) {
+    navbar.classList.toggle('mobile-open');
+    toggle.classList.toggle('active');
+  }
 }
 
 // Renderização de produtos
