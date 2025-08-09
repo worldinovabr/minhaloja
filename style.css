@@ -1455,76 +1455,142 @@ a:focus {
   }
 }
 
-/* Estilos específicos para o modal de login */
+/* Estilos específicos para o modal de login - Design Moderno */
 #login-modal .modal-content {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9)) !important;
-  backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(139, 69, 19, 0.1) !important;
-  border-radius: 24px !important;
-  padding: 2.5rem !important;
+  background: linear-gradient(145deg, 
+    rgba(255, 255, 255, 0.25), 
+    rgba(255, 255, 255, 0.1)) !important;
+  backdrop-filter: blur(30px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 32px !important;
+  padding: 3rem 2.5rem !important;
   box-shadow: 
-    0 25px 60px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.2) !important;
-  max-width: 480px !important;
+    0 35px 80px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  max-width: 520px !important;
   width: 90% !important;
-  margin: 8% auto !important;
+  margin: 6% auto !important;
   min-height: auto !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+#login-modal .modal-content::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 1px !important;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.8), 
+    transparent) !important;
+  z-index: 1 !important;
 }
 
 #login-modal h2 {
-  color: #2d3748 !important;
-  font-size: 1.75rem !important;
-  font-weight: 700 !important;
+  color: #1a202c !important;
+  font-size: 2rem !important;
+  font-weight: 800 !important;
   text-align: center !important;
-  margin-bottom: 2rem !important;
-  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  margin-bottom: 2.5rem !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   background-clip: text !important;
+  position: relative !important;
+  z-index: 2 !important;
 }
 
 #login-modal h2 i {
-  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   background-clip: text !important;
-  margin-right: 0.5rem !important;
+  margin-right: 0.75rem !important;
+  font-size: 1.8rem !important;
 }
 
 #login-modal input {
   width: 100% !important;
-  padding: 1rem 1.25rem !important;
-  border: 2px solid rgba(139, 69, 19, 0.1) !important;
-  border-radius: 12px !important;
+  padding: 1.25rem 1.5rem !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 20px !important;
   font-size: 1rem !important;
-  background: rgba(255, 255, 255, 0.8) !important;
-  backdrop-filter: blur(10px) !important;
-  margin-bottom: 1.25rem !important;
-  transition: all 0.3s ease !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(20px) !important;
+  margin-bottom: 1.5rem !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
   box-sizing: border-box !important;
+  color: #2d3748 !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+#login-modal input::placeholder {
+  color: rgba(45, 55, 72, 0.6) !important;
+  font-weight: 400 !important;
 }
 
 #login-modal input:focus {
   outline: none !important;
-  border-color: #667eea !important;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
-  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(102, 126, 234, 0.6) !important;
+  box-shadow: 
+    0 0 0 4px rgba(102, 126, 234, 0.1),
+    0 8px 32px rgba(102, 126, 234, 0.15) !important;
+  background: rgba(255, 255, 255, 0.4) !important;
+  transform: translateY(-2px) !important;
 }
 
 #login-modal .btn-primary {
   width: 100% !important;
-  padding: 1rem !important;
-  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  padding: 1.25rem 2rem !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%) !important;
   color: white !important;
   border: none !important;
-  border-radius: 12px !important;
-  font-size: 1rem !important;
-  font-weight: 600 !important;
+  border-radius: 20px !important;
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
   cursor: pointer !important;
-  transition: all 0.3s ease !important;
-  margin-bottom: 1.5rem !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  margin-bottom: 2rem !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.5px !important;
+  letter-spacing: 1px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  z-index: 2 !important;
+  box-shadow: 
+    0 10px 30px rgba(102, 126, 234, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+#login-modal .btn-primary::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.2), 
+    transparent) !important;
+  transition: left 0.6s ease !important;
+}
+
+#login-modal .btn-primary:hover::before {
+  left: 100% !important;
+}
+
+#login-modal .btn-primary:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 
+    0 15px 40px rgba(102, 126, 234, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 50%, #f093fb 100%) !important;
 }
 
 #login-modal .btn-primary:hover {
@@ -1538,21 +1604,44 @@ a:focus {
 }
 
 #login-modal .modal-divider {
-  margin: 2rem 0 !important;
+  margin: 2.5rem 0 !important;
   position: relative !important;
+  text-align: center !important;
 }
 
 #login-modal .modal-divider::before {
-  background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.3), transparent) !important;
+  content: '' !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 2px !important;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(102, 126, 234, 0.3) 25%, 
+    rgba(118, 75, 162, 0.3) 75%, 
+    transparent) !important;
+  z-index: 1 !important;
 }
 
 #login-modal .modal-divider span {
-  background: rgba(255, 255, 255, 0.95) !important;
-  border: 1px solid rgba(102, 126, 234, 0.2) !important;
+  background: linear-gradient(145deg, 
+    rgba(255, 255, 255, 0.9), 
+    rgba(248, 250, 252, 0.8)) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 2px solid rgba(102, 126, 234, 0.2) !important;
   color: #4a5568 !important;
-  font-weight: 600 !important;
-  padding: 0.75rem 1.5rem !important;
-  border-radius: 25px !important;
+  font-weight: 700 !important;
+  padding: 1rem 2rem !important;
+  border-radius: 30px !important;
+  position: relative !important;
+  z-index: 2 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 2px !important;
+  font-size: 0.9rem !important;
+  box-shadow: 
+    0 8px 25px rgba(102, 126, 234, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
 }
 
 #login-modal .register-link,
@@ -1569,31 +1658,59 @@ a:focus {
 }
 
 #login-modal .btn-link {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)) !important;
+  background: linear-gradient(145deg, 
+    rgba(255, 255, 255, 0.3), 
+    rgba(255, 255, 255, 0.1)) !important;
+  backdrop-filter: blur(20px) !important;
   color: #667eea !important;
-  border: 2px solid rgba(102, 126, 234, 0.2) !important;
-  padding: 0.875rem 1.5rem !important;
-  border-radius: 12px !important;
-  font-weight: 600 !important;
+  border: 2px solid rgba(102, 126, 234, 0.3) !important;
+  padding: 1rem 2rem !important;
+  border-radius: 20px !important;
+  font-weight: 700 !important;
   text-decoration: none !important;
-  transition: all 0.3s ease !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 0.5rem !important;
+  gap: 0.75rem !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.5px !important;
-  font-size: 0.9rem !important;
+  letter-spacing: 1px !important;
+  font-size: 0.95rem !important;
   cursor: pointer !important;
-  min-width: 200px !important;
+  min-width: 220px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  box-shadow: 
+    0 8px 25px rgba(102, 126, 234, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+}
+
+#login-modal .btn-link::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.2), 
+    transparent) !important;
+  transition: left 0.5s ease !important;
+}
+
+#login-modal .btn-link:hover::before {
+  left: 100% !important;
 }
 
 #login-modal .btn-link:hover {
-  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
   color: white !important;
-  border-color: #667eea !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.25) !important;
+  border-color: transparent !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 
+    0 12px 35px rgba(102, 126, 234, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
 }
 
 #login-modal .btn-link:active {
@@ -1601,42 +1718,59 @@ a:focus {
 }
 
 #login-modal .forgot-password .btn-link {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1)) !important;
+  background: linear-gradient(145deg, 
+    rgba(239, 68, 68, 0.1), 
+    rgba(220, 38, 38, 0.05)) !important;
   color: #dc2626 !important;
-  border-color: rgba(239, 68, 68, 0.2) !important;
+  border-color: rgba(220, 38, 38, 0.3) !important;
+  box-shadow: 
+    0 8px 25px rgba(220, 38, 38, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
 }
 
 #login-modal .forgot-password .btn-link:hover {
-  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
   color: white !important;
-  border-color: #dc2626 !important;
-  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.25) !important;
+  border-color: transparent !important;
+  box-shadow: 
+    0 12px 35px rgba(220, 38, 38, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
 }
 
 #login-modal .close {
   position: absolute !important;
-  top: 1rem !important;
-  right: 1rem !important;
-  background: rgba(239, 68, 68, 0.1) !important;
+  top: 1.5rem !important;
+  right: 1.5rem !important;
+  background: linear-gradient(145deg, 
+    rgba(239, 68, 68, 0.1), 
+    rgba(220, 38, 38, 0.05)) !important;
+  backdrop-filter: blur(20px) !important;
   color: #dc2626 !important;
-  border: none !important;
-  width: 40px !important;
-  height: 40px !important;
+  border: 2px solid rgba(220, 38, 38, 0.2) !important;
+  width: 48px !important;
+  height: 48px !important;
   border-radius: 50% !important;
   cursor: pointer !important;
-  font-size: 1.2rem !important;
+  font-size: 1.4rem !important;
   font-weight: bold !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  transition: all 0.3s ease !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
   z-index: 10 !important;
+  box-shadow: 
+    0 8px 25px rgba(220, 38, 38, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
 }
 
 #login-modal .close:hover {
-  background: #dc2626 !important;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
   color: white !important;
+  border-color: transparent !important;
   transform: rotate(90deg) scale(1.1) !important;
+  box-shadow: 
+    0 12px 35px rgba(220, 38, 38, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
 }
 
 /* Responsividade para o modal de login */
