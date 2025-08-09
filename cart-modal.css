@@ -334,21 +334,26 @@
 }
 
 .btn-clear {
-  background: rgba(231, 76, 60, 0.1);
-  color: #e74c3c;
-  border: 2px solid #e74c3c;
-  padding: 1rem 1.5rem;
-  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));
+  color: #dc2626;
+  border: 2px solid rgba(239, 68, 68, 0.3);
+  padding: 0.875rem 1.5rem;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: 700;
-  font-size: 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex: 1;
-  max-width: 200px;
+  max-width: 180px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .btn-clear::before {
@@ -358,8 +363,8 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.6s;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  transition: left 0.5s ease-in-out;
 }
 
 .btn-clear:hover::before {
@@ -367,10 +372,22 @@
 }
 
 .btn-clear:hover {
-  background: #e74c3c;
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
   color: white;
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+  border-color: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+}
+
+.btn-clear:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+  transition: all 0.1s ease;
+}
+
+.btn-clear:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
 }
 
 .btn-checkout {
@@ -607,7 +624,9 @@
   
   .btn-clear, .btn-checkout {
     max-width: none;
-    padding: 0.875rem;
+    padding: 1rem;
+    font-size: 0.9rem;
+    border-radius: 10px;
   }
   
   .empty-cart {
@@ -701,7 +720,9 @@
   }
   
   .btn-clear, .btn-checkout {
-    padding: 0.75rem;
-    font-size: 0.9rem;
+    padding: 0.875rem;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    letter-spacing: 0.3px;
   }
 }
