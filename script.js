@@ -914,7 +914,7 @@ function handleLogin(event) {
 async function authenticateUser(email, password) {
   try {
     // Importar Firebase Service
-    const { firebaseService } = await import('./firebase-config.js');
+    const { firebaseService } = await import('./firebase-config-clean.js');
     
     // Tentar fazer login
     const result = await firebaseService.signIn(email, password);
@@ -1152,7 +1152,7 @@ async function registerUser(data) {
     let firebaseService;
     try {
       AuthLogger.info('Tentando importar Firebase...');
-      const firebaseModule = await import('./firebase-config.js');
+      const firebaseModule = await import('./firebase-config-clean.js');
       AuthLogger.info('Firebase importado com sucesso');
       
       firebaseService = firebaseModule.firebaseService;
@@ -1435,7 +1435,7 @@ function handleLogout() {
 // Função para logout do Firebase
 async function logoutFromFirebase() {
   try {
-    const { firebaseService } = await import('./firebase-config.js');
+    const { firebaseService } = await import('./firebase-config-clean.js');
     await firebaseService.logout();
     AuthLogger.success('Logout do Firebase realizado');
   } catch (error) {
@@ -1475,34 +1475,37 @@ document.addEventListener('DOMContentLoaded', function() {
 // Função para sincronizar com Firebase
 async function syncFirebaseAuth() {
   try {
-    const { checkAuth, firebaseService } = await import('./firebase-config.js');
-    const firebaseUser = await checkAuth();
-    const localUser = JSON.parse(localStorage.getItem('currentUser'));
+    const { auth, firebaseService } = await import('./firebase-config-clean.js');
+    const { onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
     
-    if (firebaseUser && !localUser) {
-      // Usuário logado no Firebase mas não no localStorage
-      AuthLogger.info('Sincronizando estado de autenticação...');
+    // Verificar estado atual do Firebase Auth
+    onAuthStateChanged(auth, async (firebaseUser) => {
+      const localUser = JSON.parse(localStorage.getItem('currentUser'));
       
-      const userData = await firebaseService.getUserByEmail(firebaseUser.email);
-      
-      if (userData.success) {
+      if (firebaseUser && !localUser) {
+        // Usuário logado no Firebase mas não no localStorage
+        AuthLogger.info('Sincronizando estado de autenticação...');
+        
+        // Buscar dados do usuário
+        const userData = { email: firebaseUser.email, nome: firebaseUser.displayName || 'Usuário' };
+        
         const sessionData = {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
-          userData: userData.user,
+          userData: userData,
           loginTime: new Date().toISOString()
         };
         
         localStorage.setItem('currentUser', JSON.stringify(sessionData));
-        updateUserInterface(userData.user);
+        updateUserInterface(userData);
         AuthLogger.success('Estado sincronizado com Firebase');
+      } else if (!firebaseUser && localUser) {
+        // Usuário no localStorage mas não no Firebase (sessão expirada)
+        AuthLogger.info('Limpando sessão expirada...');
+        localStorage.removeItem('currentUser');
+        location.reload();
       }
-    } else if (!firebaseUser && localUser) {
-      // Usuário no localStorage mas não no Firebase (sessão expirada)
-      AuthLogger.info('Limpando sessão expirada...');
-      localStorage.removeItem('currentUser');
-      location.reload();
-    }
+    });
     
   } catch (error) {
     AuthLogger.warn('Erro ao sincronizar com Firebase:', error);
