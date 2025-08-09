@@ -14,21 +14,96 @@ body {
   line-height: 1.6;
 }
 
-/* Header da Vitrine */
-.header-container {
+/* Header Principal */
+header {
+  background: linear-gradient(135deg, #2c3e50, #34495e);
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: nowrap;
-  padding: 1rem 2rem;
-  max-width: 1400px;
+  max-width: 1200px;
   margin: 0 auto;
-  width: 100%;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: 0 0 20px 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  gap: 1rem;
+  padding: 1rem 2rem;
+  flex-wrap: nowrap;
+  gap: 2rem;
+}
+
+.header-content h1 {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  background: linear-gradient(135deg, #3498db, #e74c3c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  flex-shrink: 0;
+}
+
+.nav-bar {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: nowrap;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.nav-bar a {
+  color: #fff;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  white-space: nowrap;
+  position: relative;
+}
+
+.nav-bar a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.nav-bar a.active {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+.user-info {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  color: #fff;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.btn-login {
+  background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+  color: #fff !important;
+  padding: 0.6rem 1.5rem !important;
+  border-radius: 25px !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3) !important;
+}
+
+.btn-login:hover {
+  background: linear-gradient(135deg, #c0392b, #a93226) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4) !important;
 }
 
 #store-name {
@@ -448,11 +523,12 @@ body {
 
 /* Banner Principal */
 .hero-banner {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
   align-items: center;
-  padding: 5rem 2rem;
+  justify-content: space-between;
+  padding: 3rem 2rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
   color: #fff;
   margin: 2rem auto;
@@ -461,6 +537,7 @@ body {
   box-shadow: 0 20px 60px rgba(0,0,0,0.3);
   position: relative;
   overflow: hidden;
+  min-height: 400px;
 }
 
 .hero-banner::before {
@@ -477,41 +554,51 @@ body {
 .banner-content {
   position: relative;
   z-index: 2;
+  flex: 1;
+  max-width: 50%;
 }
 
 .banner-content h2 {
-  font-size: 3.5rem;
-  margin-bottom: 1.5rem;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
   font-weight: 800;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
   background: linear-gradient(45deg, #fff, #f0f8ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  line-height: 1.2;
 }
 
 .banner-content p {
-  font-size: 1.4rem;
-  margin-bottom: 2.5rem;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
   opacity: 0.95;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+  line-height: 1.6;
 }
 
 .banner-image {
   position: relative;
   z-index: 2;
+  flex: 1;
+  max-width: 45%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .banner-image img {
   width: 100%;
+  max-width: 400px;
+  height: auto;
   border-radius: 20px;
   box-shadow: 0 15px 40px rgba(0,0,0,0.4);
-  transform: perspective(1000px) rotateY(-5deg);
   transition: transform 0.3s ease;
 }
 
 .banner-image img:hover {
-  transform: perspective(1000px) rotateY(0deg) scale(1.05);
+  transform: scale(1.05);
 }
 
 /* Seções da Vitrine */
