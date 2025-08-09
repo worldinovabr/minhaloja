@@ -304,14 +304,466 @@
       }
       
       // Definir ano no footer
-      document.getElementById('ano').textContent = new Date().getFullYear();
+      const anoElement = document.getElementById('ano');
+      if (anoElement) {
+        anoElement.textContent = new Date().getFullYear();
+      }
       
       // Mostrar seção inicial
       showSection('inicio');
       
+      // Configurar eventos dos botões
+      setupButtonEvents();
+      
       // Configurar evento de busca (se existir)
       setupSearchEvents();
+      
+      // Configurar eventos do carrinho
+      setupCartEvents();
+      
+      // Configurar eventos de navegação
+      setupNavigationEvents();
     });
+    
+    // Função para configurar eventos dos botões
+    function setupButtonEvents() {
+      // Botão Ver Produtos no banner
+      const verProdutosBtn = document.querySelector('.btn-primary');
+      if (verProdutosBtn) {
+        verProdutosBtn.addEventListener('click', function() {
+          showSection('produtos');
+          setActiveNavLink('produtos');
+        });
+      }
+      
+      // Botões de categoria (se existirem)
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const category = this.dataset.category;
+          filterProductsByCategory(category);
+        });
+      });
+      
+      // Botões de produto (se existirem)
+      document.querySelectorAll('.product-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const productId = this.dataset.productId;
+          addToCart(productId);
+        });
+      });
+      
+      // Botão de formulário de contato
+      const contactForm = document.getElementById('contact-form');
+      if (contactForm) {
+        contactForm.addEventListener('submit', handleContactForm);
+      }
+    }
+    
+    // Função para configurar eventos de navegação
+    function setupNavigationEvents() {
+      // Links de navegação
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const href = this.getAttribute('href');
+          if (href && href.startsWith('#')) {
+            const section = href.substring(1);
+            showSection(section);
+            setActiveNavLink(section);
+          }
+        });
+      });
+      
+      // Logo clickável
+      const logo = document.querySelector('.logo-section h1');
+      if (logo) {
+        logo.addEventListener('click', function() {
+          showSection('inicio');
+          setActiveNavLink('inicio');
+        });
+      }
+    }
+    
+    // Função para configurar eventos do carrinho
+    function setupCartEvents() {
+      // Botão do carrinho
+      const cartInfo = document.querySelector('.cart-info');
+      if (cartInfo) {
+        cartInfo.addEventListener('click', function() {
+          showCartModal();
+        });
+      }
+      
+      // Botão de login
+      const loginBtn = document.querySelector('.btn-login');
+      if (loginBtn) {
+        loginBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (window.authManager && authManager.isAuthenticated) {
+            // Se já está logado, fazer logout
+            authManager.logout();
+          } else {
+            // Ir para página de login
+            window.location.href = 'login.html';
+          }
+        });
+      }
+    }
+    
+    // Função para mostrar seções
+    function showSection(sectionName) {
+      // Ocultar todas as seções
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+      });
+      
+      // Mostrar seção selecionada
+      const targetSection = document.getElementById(sectionName);
+      if (targetSection) {
+        targetSection.classList.add('active');
+        targetSection.style.display = 'block';
+      }
+      
+      // Scroll suave para o topo
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+      
+      // Ações específicas por seção
+      switch(sectionName) {
+        case 'produtos':
+          loadProductsSection();
+          break;
+        case 'inicio':
+          loadHomeSection();
+          break;
+        case 'sobre':
+          loadAboutSection();
+          break;
+        case 'contato':
+          loadContactSection();
+          break;
+      }
+      
+      // Atualizar URL sem recarregar página
+      if (history.pushState) {
+        history.pushState(null, null, '#' + sectionName);
+      }
+    }
+    
+    // Função para definir link ativo na navegação
+    function setActiveNavLink(sectionName) {
+      // Remover classe ativa de todos os links
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+      });
+      
+      // Adicionar classe ativa ao link correspondente
+      const activeLink = document.querySelector(`[href="#${sectionName}"]`);
+      if (activeLink) {
+        activeLink.classList.add('active');
+      }
+    }
+    
+    // Funções para carregar conteúdo das seções
+    function loadHomeSection() {
+      console.log('Carregando seção inicial...');
+      
+      // Carregar produtos em destaque
+      if (window.productManager) {
+        loadFeaturedProducts();
+      }
+      
+      // Carregar estatísticas
+      loadSiteStats();
+    }
+    
+    function loadProductsSection() {
+      console.log('Carregando seção de produtos...');
+      
+      if (window.productManager) {
+        productManager.renderProducts();
+      } else {
+        // Fallback caso o productManager não esteja disponível
+        loadDefaultProducts();
+      }
+    }
+    
+    function loadAboutSection() {
+      console.log('Carregando seção sobre...');
+      
+      // Atualizar estatísticas da empresa
+      updateAboutStats();
+    }
+    
+    function loadContactSection() {
+      console.log('Carregando seção de contato...');
+      
+      // Configurar mapa (se necessário)
+      // Validar formulário
+      setupContactForm();
+    }
+    
+    // Função para carregar produtos em destaque
+    function loadFeaturedProducts() {
+      const featuredContainer = document.getElementById('featured-products');
+      if (!featuredContainer) return;
+      
+      // Produtos em destaque (exemplo)
+      const featuredProducts = [
+        {
+          id: 1,
+          nome: 'Produto Destaque 1',
+          preco: 99.99,
+          imagem: 'https://via.placeholder.com/300x200/4CAF50/ffffff?text=Produto+1',
+          descricao: 'Produto incrível com ótimo custo-benefício'
+        },
+        {
+          id: 2,
+          nome: 'Produto Destaque 2',
+          preco: 149.99,
+          imagem: 'https://via.placeholder.com/300x200/2196F3/ffffff?text=Produto+2',
+          descricao: 'Produto premium com qualidade superior'
+        },
+        {
+          id: 3,
+          nome: 'Produto Destaque 3',
+          preco: 79.99,
+          imagem: 'https://via.placeholder.com/300x200/FF9800/ffffff?text=Produto+3',
+          descricao: 'Melhor preço da categoria'
+        }
+      ];
+      
+      featuredContainer.innerHTML = featuredProducts.map(product => `
+        <div class="product-card featured-card" data-product-id="${product.id}">
+          <div class="product-image">
+            <img src="${product.imagem}" alt="${product.nome}">
+            <div class="product-overlay">
+              <button class="btn-quick-view" onclick="showProductDetails(${product.id})">
+                <i class="fas fa-eye"></i> Ver Detalhes
+              </button>
+            </div>
+          </div>
+          <div class="product-info">
+            <h3>${product.nome}</h3>
+            <p class="product-description">${product.descricao}</p>
+            <div class="product-price">R$ ${product.preco.toFixed(2)}</div>
+            <button class="btn-add-cart" onclick="addProductToCart(${product.id}, '${product.nome}', ${product.preco}, '${product.imagem}')">
+              <i class="fas fa-cart-plus"></i> Adicionar ao Carrinho
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    // Função para carregar produtos padrão
+    function loadDefaultProducts() {
+      const productsContainer = document.getElementById('all-products');
+      if (!productsContainer) return;
+      
+      const defaultProducts = [
+        {
+          id: 1,
+          nome: 'Camisa Polo Premium',
+          preco: 89.99,
+          categoria: 'roupas',
+          imagem: 'https://via.placeholder.com/300x300/4CAF50/ffffff?text=Camisa+Polo',
+          descricao: 'Camisa polo de alta qualidade, 100% algodão'
+        },
+        {
+          id: 2,
+          nome: 'Vestido Floral Elegante',
+          preco: 149.99,
+          categoria: 'roupas',
+          imagem: 'https://via.placeholder.com/300x300/E91E63/ffffff?text=Vestido+Floral',
+          descricao: 'Vestido floral elegante para ocasiões especiais'
+        },
+        {
+          id: 3,
+          nome: 'Calça Jeans Moderna',
+          preco: 119.99,
+          categoria: 'roupas',
+          imagem: 'https://via.placeholder.com/300x300/2196F3/ffffff?text=Calça+Jeans',
+          descricao: 'Calça jeans com corte moderno e confortável'
+        },
+        {
+          id: 4,
+          nome: 'Tênis Esportivo',
+          preco: 199.99,
+          categoria: 'calcados',
+          imagem: 'https://via.placeholder.com/300x300/FF9800/ffffff?text=Tênis+Sport',
+          descricao: 'Tênis esportivo para corrida e academia'
+        },
+        {
+          id: 5,
+          nome: 'Relógio Digital',
+          preco: 299.99,
+          categoria: 'acessorios',
+          imagem: 'https://via.placeholder.com/300x300/9C27B0/ffffff?text=Relógio',
+          descricao: 'Relógio digital com múltiplas funções'
+        },
+        {
+          id: 6,
+          nome: 'Smartphone Pro',
+          preco: 899.99,
+          categoria: 'eletronicos',
+          imagem: 'https://via.placeholder.com/300x300/607D8B/ffffff?text=Smartphone',
+          descricao: 'Smartphone com câmera profissional e 5G'
+        }
+      ];
+      
+      productsContainer.innerHTML = `
+        <div class="products-grid">
+          ${defaultProducts.map(product => `
+            <div class="product-card" data-product-id="${product.id}" data-category="${product.categoria}">
+              <div class="product-image">
+                <img src="${product.imagem}" alt="${product.nome}">
+                <div class="product-badge">Novo</div>
+                <div class="product-overlay">
+                  <button class="btn-quick-view" onclick="showProductDetails(${product.id})">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button class="btn-wishlist" onclick="addToWishlist(${product.id})">
+                    <i class="fas fa-heart"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="product-category">${product.categoria}</div>
+                <h3>${product.nome}</h3>
+                <p class="product-description">${product.descricao}</p>
+                <div class="product-price">R$ ${product.preco.toFixed(2)}</div>
+                <div class="product-rating">
+                  <div class="stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star-half-alt"></i>
+                  </div>
+                  <span class="rating-count">(4.5)</span>
+                </div>
+                <button class="btn-add-cart" onclick="addProductToCart(${product.id}, '${product.nome}', ${product.preco}, '${product.imagem}')">
+                  <i class="fas fa-cart-plus"></i> Adicionar ao Carrinho
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+    
+    // Função para carregar estatísticas do site
+    function loadSiteStats() {
+      const totalProductsElement = document.getElementById('total-products-public');
+      const totalCustomersElement = document.getElementById('total-customers');
+      
+      if (totalProductsElement) {
+        // Simular contagem animada
+        animateNumber(totalProductsElement, 0, 150, 1000);
+      }
+      
+      if (totalCustomersElement) {
+        animateNumber(totalCustomersElement, 0, 1250, 1500);
+      }
+    }
+    
+    // Função para animar números
+    function animateNumber(element, start, end, duration) {
+      const startTime = Date.now();
+      const timer = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const current = Math.floor(progress * (end - start) + start);
+        element.textContent = current.toLocaleString();
+        
+        if (progress >= 1) {
+          clearInterval(timer);
+        }
+      }, 16);
+    }
+    
+    // Função para atualizar estatísticas da seção sobre
+    function updateAboutStats() {
+      // Atualizar contadores específicos da página sobre
+      console.log('Atualizando estatísticas da empresa...');
+    }
+    
+    // Função para configurar formulário de contato
+    function setupContactForm() {
+      const form = document.getElementById('contact-form');
+      if (!form) return;
+      
+      form.addEventListener('submit', handleContactForm);
+    }
+    
+    // Função para lidar com envio do formulário de contato
+    function handleContactForm(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(e.target);
+      const contactData = {
+        nome: formData.get('nome') || e.target.querySelector('input[type="text"]')?.value,
+        email: formData.get('email') || e.target.querySelector('input[type="email"]')?.value,
+        assunto: formData.get('assunto') || e.target.querySelector('input[placeholder="Assunto"]')?.value,
+        mensagem: formData.get('mensagem') || e.target.querySelector('textarea')?.value
+      };
+      
+      // Validação básica
+      if (!contactData.nome || !contactData.email || !contactData.mensagem) {
+        showNotification('Por favor, preencha todos os campos obrigatórios.', 'error');
+        return;
+      }
+      
+      // Validação de email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(contactData.email)) {
+        showNotification('Por favor, insira um email válido.', 'error');
+        return;
+      }
+      
+      // Simular envio
+      showNotification('Enviando mensagem...', 'info');
+      
+      setTimeout(() => {
+        showNotification('Mensagem enviada com sucesso! Entraremos em contato em breve.', 'success');
+        e.target.reset();
+      }, 2000);
+    }
+    
+    // Função para mostrar notificações
+    function showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.innerHTML = `
+        <div class="notification-content">
+          <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+          <span>${message}</span>
+          <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.classList.add('show');
+      }, 100);
+      
+      // Remover automaticamente após 5 segundos
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.classList.remove('show');
+          setTimeout(() => {
+            if (notification.parentNode) {
+              notification.parentNode.removeChild(notification);
+            }
+          }, 300);
+        }
+      }, 5000);
+    }
     
     // Função para mostrar seções
     function showSection(sectionName) {
@@ -370,6 +822,9 @@
           if (searchTerm && window.productManager) {
             productManager.filterProducts({ search: searchTerm });
             showSection('produtos');
+            setActiveNavLink('produtos');
+          } else if (searchTerm) {
+            searchProducts(searchTerm);
           }
         };
         
@@ -381,6 +836,271 @@
           }
         });
       }
+    }
+    
+    // Função para buscar produtos (fallback)
+    function searchProducts(searchTerm) {
+      const allProducts = document.querySelectorAll('.product-card');
+      let found = 0;
+      
+      allProducts.forEach(card => {
+        const productName = card.querySelector('h3')?.textContent.toLowerCase() || '';
+        const productDesc = card.querySelector('.product-description')?.textContent.toLowerCase() || '';
+        
+        if (productName.includes(searchTerm.toLowerCase()) || 
+            productDesc.includes(searchTerm.toLowerCase())) {
+          card.style.display = 'block';
+          found++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+      
+      if (found === 0) {
+        showNotification(`Nenhum produto encontrado para "${searchTerm}"`, 'info');
+      } else {
+        showNotification(`${found} produto(s) encontrado(s) para "${searchTerm}"`, 'success');
+      }
+      
+      showSection('produtos');
+      setActiveNavLink('produtos');
+    }
+    
+    // Funções para produtos
+    function addProductToCart(id, nome, preco, imagem) {
+      if (window.productManager) {
+        const product = { id, nome, preco, imagem, quantity: 1 };
+        productManager.addToCart(product);
+        showNotification(`${nome} adicionado ao carrinho!`, 'success');
+      } else {
+        // Fallback simples para carrinho
+        addToCartSimple(id, nome, preco, imagem);
+      }
+    }
+    
+    // Função simples para adicionar ao carrinho (fallback)
+    function addToCartSimple(id, nome, preco, imagem) {
+      let cart = JSON.parse(localStorage.getItem('simpleCart') || '[]');
+      
+      const existingItem = cart.find(item => item.id === id);
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        cart.push({ id, nome, preco, imagem, quantity: 1 });
+      }
+      
+      localStorage.setItem('simpleCart', JSON.stringify(cart));
+      updateSimpleCartUI();
+      showNotification(`${nome} adicionado ao carrinho!`, 'success');
+    }
+    
+    // Atualizar UI do carrinho simples
+    function updateSimpleCartUI() {
+      const cart = JSON.parse(localStorage.getItem('simpleCart') || '[]');
+      const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+      
+      const cartCountElement = document.getElementById('cart-count');
+      if (cartCountElement) {
+        cartCountElement.textContent = cartCount;
+      }
+    }
+    
+    // Função para mostrar detalhes do produto
+    function showProductDetails(productId) {
+      const modal = document.createElement('div');
+      modal.className = 'modal product-modal';
+      modal.innerHTML = `
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2><i class="fas fa-info-circle"></i> Detalhes do Produto</h2>
+            <span class="close">&times;</span>
+          </div>
+          <div class="product-details-content">
+            <div class="product-image-large">
+              <img src="https://via.placeholder.com/400x300/4CAF50/ffffff?text=Produto+${productId}" alt="Produto ${productId}">
+            </div>
+            <div class="product-details-info">
+              <h3>Produto Premium ${productId}</h3>
+              <div class="product-rating">
+                <div class="stars">
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star-half-alt"></i>
+                </div>
+                <span>(4.5) • 127 avaliações</span>
+              </div>
+              <div class="product-price-large">R$ ${(99.99 * productId).toFixed(2)}</div>
+              <div class="product-description-full">
+                <p>Este é um produto de alta qualidade com características excepcionais. 
+                Feito com materiais premium e acabamento impecável.</p>
+                <ul>
+                  <li>✓ Qualidade premium garantida</li>
+                  <li>✓ Entrega em 24h</li>
+                  <li>✓ Garantia de 1 ano</li>
+                  <li>✓ Suporte técnico incluso</li>
+                </ul>
+              </div>
+              <div class="product-actions">
+                <div class="quantity-selector">
+                  <label>Quantidade:</label>
+                  <div class="qty-controls">
+                    <button onclick="changeQuantity(-1)">-</button>
+                    <input type="number" value="1" min="1" id="product-quantity">
+                    <button onclick="changeQuantity(1)">+</button>
+                  </div>
+                </div>
+                <button class="btn-add-cart-large" onclick="addToCartFromModal(${productId})">
+                  <i class="fas fa-cart-plus"></i> Adicionar ao Carrinho
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      modal.style.display = 'block';
+      
+      setTimeout(() => {
+        modal.classList.add('show');
+      }, 10);
+      
+      // Fechar modal
+      modal.querySelector('.close').addEventListener('click', () => {
+        closeModal(modal);
+      });
+      
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          closeModal(modal);
+        }
+      });
+    }
+    
+    // Função para alterar quantidade no modal
+    function changeQuantity(change) {
+      const input = document.getElementById('product-quantity');
+      if (input) {
+        const newValue = Math.max(1, parseInt(input.value) + change);
+        input.value = newValue;
+      }
+    }
+    
+    // Função para adicionar ao carrinho do modal
+    function addToCartFromModal(productId) {
+      const quantity = parseInt(document.getElementById('product-quantity')?.value || 1);
+      const productName = `Produto Premium ${productId}`;
+      const productPrice = 99.99 * productId;
+      const productImage = `https://via.placeholder.com/400x300/4CAF50/ffffff?text=Produto+${productId}`;
+      
+      for (let i = 0; i < quantity; i++) {
+        addProductToCart(productId, productName, productPrice, productImage);
+      }
+      
+      // Fechar modal
+      const modal = document.querySelector('.product-modal');
+      if (modal) {
+        closeModal(modal);
+      }
+    }
+    
+    // Função para adicionar à lista de desejos
+    function addToWishlist(productId) {
+      let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+      
+      if (!wishlist.includes(productId)) {
+        wishlist.push(productId);
+        localStorage.setItem('wishlist', JSON.stringify(wishlist));
+        showNotification('Produto adicionado à lista de desejos!', 'success');
+        
+        // Atualizar ícone do coração
+        const heartIcon = document.querySelector(`[data-product-id="${productId}"] .btn-wishlist i`);
+        if (heartIcon) {
+          heartIcon.classList.remove('fas');
+          heartIcon.classList.add('fas');
+          heartIcon.style.color = '#e74c3c';
+        }
+      } else {
+        showNotification('Produto já está na lista de desejos!', 'info');
+      }
+    }
+    
+    // Função para filtrar produtos por categoria
+    function filterProductsByCategory(category) {
+      const products = document.querySelectorAll('.product-card');
+      
+      products.forEach(card => {
+        const productCategory = card.dataset.category;
+        if (!category || category === 'all' || productCategory === category) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+      
+      showSection('produtos');
+      setActiveNavLink('produtos');
+      
+      const categoryName = category ? category.charAt(0).toUpperCase() + category.slice(1) : 'Todos';
+      showNotification(`Filtrando por categoria: ${categoryName}`, 'info');
+    }
+    
+    // Função para aplicar filtros
+    function applyFilters() {
+      const categoryFilter = document.getElementById('category-filter')?.value;
+      const priceFilter = document.getElementById('price-filter')?.value;
+      
+      filterProductsByCategory(categoryFilter);
+      
+      if (priceFilter) {
+        filterProductsByPrice(priceFilter);
+      }
+    }
+    
+    // Função para filtrar por preço
+    function filterProductsByPrice(priceRange) {
+      const products = document.querySelectorAll('.product-card');
+      
+      products.forEach(card => {
+        const priceElement = card.querySelector('.product-price');
+        if (!priceElement) return;
+        
+        const priceText = priceElement.textContent.replace('R$ ', '').replace(',', '');
+        const price = parseFloat(priceText);
+        
+        let shouldShow = true;
+        
+        switch(priceRange) {
+          case '0-50':
+            shouldShow = price <= 50;
+            break;
+          case '50-100':
+            shouldShow = price > 50 && price <= 100;
+            break;
+          case '100-200':
+            shouldShow = price > 100 && price <= 200;
+            break;
+          case '200+':
+            shouldShow = price > 200;
+            break;
+        }
+        
+        if (card.style.display !== 'none') {
+          card.style.display = shouldShow ? 'block' : 'none';
+        }
+      });
+    }
+    
+    // Função para fechar modal
+    function closeModal(modal) {
+      modal.classList.remove('show');
+      setTimeout(() => {
+        if (modal.parentNode) {
+          document.body.removeChild(modal);
+        }
+      }, 300);
     }
     
     // Modal do carrinho
@@ -570,10 +1290,372 @@
     
     // Funções globais compatíveis com o HTML existente
     window.showSection = showSection;
-    window.setActiveLink = setActiveLink;
+    window.setActiveLink = setActiveNavLink;
     window.showCartModal = showCartModal;
+    window.addProductToCart = addProductToCart;
+    window.showProductDetails = showProductDetails;
+    window.addToWishlist = addToWishlist;
+    window.filterProductsByCategory = filterProductsByCategory;
+    window.applyFilters = applyFilters;
+    window.changeQuantity = changeQuantity;
+    window.addToCartFromModal = addToCartFromModal;
+    window.showNotification = showNotification;
     
-    // Função para mostrar seções
+    // Inicializar carrinho simples se necessário
+    document.addEventListener('DOMContentLoaded', function() {
+      updateSimpleCartUI();
+    });
+    
+    // Configurar navegação por URL
+    window.addEventListener('popstate', function(e) {
+      const hash = window.location.hash.substring(1);
+      if (hash) {
+        showSection(hash);
+        setActiveNavLink(hash);
+      }
+    });
+    
+    // Verificar URL inicial
+    window.addEventListener('load', function() {
+      const hash = window.location.hash.substring(1);
+      if (hash) {
+        showSection(hash);
+        setActiveNavLink(hash);
+      }
+    });
+  </script>
+  
+  <!-- CSS adicional para as novas funcionalidades -->
+  <style>
+    /* Estilos para produtos */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      padding: 2rem 0;
+    }
+    
+    .product-card {
+      background: #fff;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    
+    .product-image {
+      position: relative;
+      overflow: hidden;
+      height: 200px;
+    }
+    
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+    
+    .product-card:hover .product-image img {
+      transform: scale(1.1);
+    }
+    
+    .product-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: #e74c3c;
+      color: #fff;
+      padding: 0.3rem 0.6rem;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    
+    .product-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .product-card:hover .product-overlay {
+      opacity: 1;
+    }
+    
+    .btn-quick-view, .btn-wishlist {
+      background: #fff;
+      color: #333;
+      border: none;
+      padding: 0.8rem;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 45px;
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .btn-quick-view:hover {
+      background: #3498db;
+      color: #fff;
+    }
+    
+    .btn-wishlist:hover {
+      background: #e74c3c;
+      color: #fff;
+    }
+    
+    .product-info {
+      padding: 1.5rem;
+    }
+    
+    .product-category {
+      color: #666;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .product-info h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.2rem;
+      color: #333;
+    }
+    
+    .product-description {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+    
+    .product-price {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #28a745;
+      margin-bottom: 1rem;
+    }
+    
+    .product-rating {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .stars {
+      color: #ffc107;
+    }
+    
+    .rating-count {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    .btn-add-cart {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: #fff;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    .btn-add-cart:hover {
+      background: linear-gradient(135deg, #218838, #1ea080);
+      transform: translateY(-2px);
+    }
+    
+    /* Estilos para modal de produto */
+    .product-modal .modal-content {
+      max-width: 800px;
+      width: 90%;
+    }
+    
+    .product-details-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      padding: 2rem;
+    }
+    
+    .product-image-large img {
+      width: 100%;
+      border-radius: 10px;
+    }
+    
+    .product-price-large {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #28a745;
+      margin: 1rem 0;
+    }
+    
+    .product-description-full ul {
+      list-style: none;
+      padding: 0;
+      margin: 1rem 0;
+    }
+    
+    .product-description-full li {
+      padding: 0.3rem 0;
+      color: #666;
+    }
+    
+    .quantity-selector {
+      margin: 1rem 0;
+    }
+    
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    
+    .qty-controls button {
+      background: #f8f9fa;
+      border: 1px solid #ddd;
+      width: 40px;
+      height: 40px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    
+    .qty-controls input {
+      width: 60px;
+      text-align: center;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 0.5rem;
+    }
+    
+    .btn-add-cart-large {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: #fff;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-size: 1.1rem;
+    }
+    
+    /* Estilos para notificações */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #fff;
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+      z-index: 10001;
+      transform: translateX(400px);
+      transition: transform 0.3s ease;
+      min-width: 300px;
+    }
+    
+    .notification.show {
+      transform: translateX(0);
+    }
+    
+    .notification.success {
+      border-left: 4px solid #28a745;
+    }
+    
+    .notification.error {
+      border-left: 4px solid #dc3545;
+    }
+    
+    .notification.info {
+      border-left: 4px solid #17a2b8;
+    }
+    
+    .notification-content {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .notification-content i {
+      font-size: 1.2rem;
+    }
+    
+    .notification.success i {
+      color: #28a745;
+    }
+    
+    .notification.error i {
+      color: #dc3545;
+    }
+    
+    .notification.info i {
+      color: #17a2b8;
+    }
+    
+    .notification-close {
+      background: none;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      color: #666;
+      margin-left: auto;
+    }
+    
+    /* Responsividade */
+    @media (max-width: 768px) {
+      .products-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        padding: 1rem 0;
+      }
+      
+      .product-details-content {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 1rem;
+      }
+      
+      .notification {
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+      }
+    }
+  </style>    // Função para mostrar seções
     function showSection(sectionName) {
       // Ocultar todas as seções
       document.querySelectorAll('.section').forEach(section => {
@@ -620,7 +1702,10 @@
           <div class="cart-content">
             ${cart.length === 0 ? 
               '<div class="empty-cart">Seu carrinho está vazio</div>' :
-              cart.map(item => `
+              cart.map(item => {
+                const decreaseQty = item.quantity > 1 ? item.quantity - 1 : 1;
+                const increaseQty = item.quantity + 1;
+                return `
                 <div class="cart-item-modal">
                   <img src="${item.imagem || 'https://via.placeholder.com/60x60?text=Produto'}" alt="${item.nome}">
                   <div class="item-info">
@@ -628,14 +1713,15 @@
                     <p>R$ ${item.preco.toFixed(2)} cada</p>
                   </div>
                   <div class="quantity-controls">
-                    <button onclick="updateCartQuantity('${item.id}', ${item.quantity - 1})">-</button>
+                    <button onclick="updateCartQuantity(&#39;${item.id}&#39;, ${decreaseQty})">-</button>
                     <span>${item.quantity}</span>
-                    <button onclick="updateCartQuantity('${item.id}', ${item.quantity + 1})">+</button>
+                    <button onclick="updateCartQuantity(&#39;${item.id}&#39;, ${increaseQty})">+</button>
                   </div>
                   <div class="item-total">R$ ${(item.preco * item.quantity).toFixed(2)}</div>
                   <button class="btn-remove" onclick="removeFromCart('${item.id}')">&times;</button>
                 </div>
-              `).join('')
+              `;
+              }).join('')
             }
           </div>
           ${cart.length > 0 ? `
