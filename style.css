@@ -3070,3 +3070,96 @@ a:focus {
     min-width: 160px;
   }
 }
+
+/* Banner de Verificação de Email */
+.email-verification-banner {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  padding: 12px 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  animation: slideDown 0.3s ease-out;
+}
+
+.banner-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding: 0 20px;
+  font-size: 14px;
+}
+
+.banner-content i {
+  font-size: 16px;
+  animation: pulse 2s infinite;
+}
+
+.banner-content button {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.3s ease;
+}
+
+.banner-content button:hover {
+  background: rgba(255,255,255,0.3);
+  transform: translateY(-1px);
+}
+
+.banner-content button:last-child {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  padding: 4px 8px;
+  font-weight: bold;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Ajustar o body quando o banner está ativo */
+body:has(.email-verification-banner) {
+  padding-top: 50px;
+}
+
+@media (max-width: 768px) {
+  .banner-content {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+  
+  .banner-content span {
+    font-size: 13px;
+  }
+  
+  body:has(.email-verification-banner) {
+    padding-top: 70px;
+  }
+}

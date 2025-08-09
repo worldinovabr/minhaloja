@@ -5,7 +5,9 @@ import {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signOut, 
-  onAuthStateChanged 
+  onAuthStateChanged,
+  sendEmailVerification,
+  updateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { 
   getFirestore, 
@@ -56,6 +58,8 @@ export {
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
+  sendEmailVerification,
+  updateProfile,
   collection,
   addDoc,
   getDocs,
@@ -326,7 +330,25 @@ export class FirebaseService {
       
       console.log('✅ Dados salvos no Firestore. Doc ID:', docRef.id);
 
-      return { success: true, user: userCredential.user, userType: userData.tipo };
+      // Enviar email de verificação
+      try {
+        console.log('📧 Enviando email de verificação...');
+        await sendEmailVerification(userCredential.user, {
+          url: `${window.location.origin}/index.html?verified=true`,
+          handleCodeInApp: false
+        });
+        console.log('✅ Email de verificação enviado com sucesso!');
+      } catch (emailError) {
+        console.warn('⚠️ Não foi possível enviar o email de verificação:', emailError);
+        // Não falhar o registro por causa do email
+      }
+
+      return { 
+        success: true, 
+        user: userCredential.user, 
+        userType: userData.tipo,
+        emailSent: true 
+      };
     } catch (error) {
       console.error('❌ Firebase signUp error:', error);
       console.error('Error code:', error.code);
@@ -356,6 +378,53 @@ export class FirebaseService {
   isValidEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  }
+
+  // Reenviar email de verificação
+  async resendVerificationEmail() {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        return { success: false, error: 'Usuário não está logado' };
+      }
+
+      if (user.emailVerified) {
+        return { success: false, error: 'Email já está verificado' };
+      }
+
+      await sendEmailVerification(user, {
+        url: `${window.location.origin}/index.html?verified=true`,
+        handleCodeInApp: false
+      });
+
+      return { success: true, message: 'Email de verificação reenviado com sucesso!' };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: this.getAuthErrorMessage(error.code) || error.message 
+      };
+    }
+  }
+
+  // Verificar se o email foi verificado
+  async checkEmailVerification() {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        return { success: false, error: 'Usuário não está logado' };
+      }
+
+      // Recarregar dados do usuário para obter status atualizado
+      await user.reload();
+      
+      return { 
+        success: true, 
+        verified: user.emailVerified,
+        email: user.email 
+      };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
   }
 
   // Obter mensagem de erro amigável

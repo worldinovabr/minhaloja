@@ -883,6 +883,9 @@ function handleLogin(event) {
         
         AuthLogger.success('Login realizado:', result.userData.nome);
         
+        // Verificar status de verificação de email após login
+        setTimeout(checkEmailVerificationStatus, 1000);
+        
       } else {
         // Verificar se usuário não existe para redirecionar para registro
         if (AuthUtils.isUserNotFoundError(result.error)) {
@@ -1093,7 +1096,17 @@ function handleRegister(event) {
       if (result.success) {
         // Registro bem-sucedido
         closeRegisterModal();
-        showNotification(`${AUTH_CONFIG.MESSAGES.REGISTER_SUCCESS} Bem-vindo, ${data.name}!`, 'success');
+        
+        // Mostrar mensagem especial se email foi enviado
+        if (result.emailSent) {
+          showNotification(
+            `${AUTH_CONFIG.MESSAGES.REGISTER_SUCCESS} Bem-vindo, ${data.name}! 📧 Verifique seu email para confirmar sua conta.`, 
+            'success', 
+            8000 // Mostrar por mais tempo
+          );
+        } else {
+          showNotification(`${AUTH_CONFIG.MESSAGES.REGISTER_SUCCESS} Bem-vindo, ${data.name}!`, 'success');
+        }
         
         // Salvar sessão do usuário
         saveUserSession(result.user, result.userData);
@@ -1499,6 +1512,9 @@ async function syncFirebaseAuth() {
         localStorage.setItem('currentUser', JSON.stringify(sessionData));
         updateUserInterface(userData);
         AuthLogger.success('Estado sincronizado com Firebase');
+        
+        // Verificar status de verificação de email
+        setTimeout(checkEmailVerificationStatus, 2000);
       } else if (!firebaseUser && localUser) {
         // Usuário no localStorage mas não no Firebase (sessão expirada)
         AuthLogger.info('Limpando sessão expirada...');
@@ -1538,4 +1554,63 @@ function updateWishlistUI() {
       btn.classList.remove('active');
     }
   });
+}
+
+// Função para verificar e exibir status de verificação de email
+async function checkEmailVerificationStatus() {
+  try {
+    const firebaseConfig = await import('./firebase-config.js');
+    const result = await firebaseConfig.firebaseService.checkEmailVerification();
+    
+    if (result.success && !result.verified) {
+      showEmailVerificationBanner(result.email);
+    }
+  } catch (error) {
+    console.error('Erro ao verificar status do email:', error);
+  }
+}
+
+// Mostrar banner de verificação de email
+function showEmailVerificationBanner(email) {
+  // Verificar se o banner já existe
+  if (document.querySelector('.email-verification-banner')) {
+    return;
+  }
+
+  const banner = document.createElement('div');
+  banner.className = 'email-verification-banner';
+  banner.innerHTML = `
+    <div class="banner-content">
+      <i class="fas fa-envelope"></i>
+      <span>Confirme seu email (${email}) para ativar todas as funcionalidades.</span>
+      <button onclick="resendVerificationEmail()">Reenviar Email</button>
+      <button onclick="closeVerificationBanner()">×</button>
+    </div>
+  `;
+  
+  document.body.insertBefore(banner, document.body.firstChild);
+}
+
+// Reenviar email de verificação
+async function resendVerificationEmail() {
+  try {
+    const firebaseConfig = await import('./firebase-config.js');
+    const result = await firebaseConfig.firebaseService.resendVerificationEmail();
+    
+    if (result.success) {
+      showNotification('📧 Email de verificação reenviado! Verifique sua caixa de entrada.', 'success');
+    } else {
+      showNotification(result.error, 'error');
+    }
+  } catch (error) {
+    showNotification('Erro ao reenviar email. Tente novamente.', 'error');
+  }
+}
+
+// Fechar banner de verificação
+function closeVerificationBanner() {
+  const banner = document.querySelector('.email-verification-banner');
+  if (banner) {
+    banner.remove();
+  }
 }
