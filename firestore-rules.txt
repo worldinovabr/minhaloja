@@ -1,0 +1,47 @@
+// Regras do Firestore Security Rules
+// Cole estas regras no Console do Firebase > Firestore Database > Rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Permitir leitura e escrita na coleção 'users' para usuários autenticados
+    match /users/{userId} {
+      allow read, write: if request.auth != null;
+      allow create: if true; // Permitir criação durante registro
+    }
+    
+    // Permitir leitura de produtos para todos, escrita apenas para admins
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Permitir operações em pedidos apenas para o proprietário ou admin
+    match /orders/{orderId} {
+      allow read, write: if request.auth != null && 
+        (resource.data.userId == request.auth.uid ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+    
+    // Permitir leitura de categorias para todos
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Permitir operações de teste durante desenvolvimento
+    match /tests/{testId} {
+      allow read, write: if true;
+    }
+    
+    // Logs de auditoria apenas para admins
+    match /audit_logs/{logId} {
+      allow read: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      allow create: if request.auth != null;
+    }
+  }
+}

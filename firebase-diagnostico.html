@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Firebase</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .test-section { background: white; margin: 20px 0; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .success { background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .error { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .info { background: #d1ecf1; color: #0c5460; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .log { background: #f8f9fa; padding: 15px; border-radius: 5px; font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Diagnóstico Completo do Firebase</h1>
+        
+        <div class="test-section">
+            <h2>1. Status de Conexão</h2>
+            <button onclick="testBasicConnection()">Testar Conexão Básica</button>
+            <div id="connectionResult"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>2. Autenticação</h2>
+            <button onclick="testAuthStatus()">Verificar Status Auth</button>
+            <button onclick="testCreateUser()">Testar Criar Usuário</button>
+            <div id="authResult"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>3. Firestore Database</h2>
+            <button onclick="testFirestoreRead()">Testar Leitura</button>
+            <button onclick="testFirestoreWrite()">Testar Escrita</button>
+            <div id="firestoreResult"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>4. Regras de Segurança</h2>
+            <button onclick="testSecurityRules()">Verificar Regras</button>
+            <div id="securityResult"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>5. Log Completo</h2>
+            <button onclick="clearLog()">Limpar Log</button>
+            <div id="fullLog" class="log"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        let logContent = '';
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            logContent += `[${timestamp}] ${message}\n`;
+            document.getElementById('fullLog').textContent = logContent;
+            console.log(message);
+        }
+        
+        window.clearLog = () => {
+            logContent = '';
+            document.getElementById('fullLog').textContent = '';
+        };
+        
+        // 1. Teste de Conexão Básica
+        window.testBasicConnection = async function() {
+            const resultDiv = document.getElementById('connectionResult');
+            resultDiv.innerHTML = '<div class="info">Testando conexão...</div>';
+            
+            try {
+                log('🔄 Iniciando teste de conexão básica...');
+                
+                // Importar Firebase
+                const firebaseModule = await import('./firebase-config.js');
+                log('✅ Firebase importado com sucesso');
+                
+                // Verificar se as funções estão disponíveis
+                if (firebaseModule.auth) {
+                    log('✅ Auth disponível');
+                } else {
+                    log('❌ Auth não disponível');
+                }
+                
+                if (firebaseModule.db) {
+                    log('✅ Firestore disponível');
+                } else {
+                    log('❌ Firestore não disponível');
+                }
+                
+                if (firebaseModule.firebaseService) {
+                    log('✅ FirebaseService disponível');
+                } else {
+                    log('❌ FirebaseService não disponível');
+                }
+                
+                resultDiv.innerHTML = '<div class="success">✅ Conexão básica funcionando!</div>';
+                
+            } catch (error) {
+                log(`❌ Erro na conexão: ${error.message}`);
+                resultDiv.innerHTML = `<div class="error">❌ Erro: ${error.message}</div>`;
+            }
+        };
+        
+        // 2. Teste de Autenticação
+        window.testAuthStatus = async function() {
+            const resultDiv = document.getElementById('authResult');
+            resultDiv.innerHTML = '<div class="info">Verificando autenticação...</div>';
+            
+            try {
+                log('🔄 Verificando status de autenticação...');
+                
+                const { auth, onAuthStateChanged } = await import('./firebase-config.js');
+                
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        log(`✅ Usuário logado: ${user.email}`);
+                        resultDiv.innerHTML = `<div class="success">✅ Usuário logado: ${user.email}</div>`;
+                    } else {
+                        log('ℹ️ Nenhum usuário logado');
+                        resultDiv.innerHTML = '<div class="info">ℹ️ Nenhum usuário logado</div>';
+                    }
+                });
+                
+            } catch (error) {
+                log(`❌ Erro no auth: ${error.message}`);
+                resultDiv.innerHTML = `<div class="error">❌ Erro: ${error.message}</div>`;
+            }
+        };
+        
+        // 3. Teste de Criar Usuário
+        window.testCreateUser = async function() {
+            const resultDiv = document.getElementById('authResult');
+            resultDiv.innerHTML = '<div class="info">Testando criação de usuário...</div>';
+            
+            try {
+                log('🔄 Testando criação de usuário...');
+                
+                const { firebaseService } = await import('./firebase-config.js');
+                
+                // Gerar dados de teste únicos
+                const timestamp = Date.now();
+                const testEmail = `teste${timestamp}@exemplo.com`;
+                const testPassword = '123456';
+                
+                const userData = {
+                    nome: 'Usuario Teste',
+                    tipo: 'cliente',
+                    telefone: '(11) 99999-9999'
+                };
+                
+                log(`🧪 Tentando criar usuário: ${testEmail}`);
+                
+                const result = await firebaseService.signUp(testEmail, testPassword, userData);
+                
+                if (result.success) {
+                    log(`✅ Usuário criado com sucesso! UID: ${result.user.uid}`);
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Usuário criado com sucesso!<br>
+                            Email: ${testEmail}<br>
+                            UID: ${result.user.uid}
+                        </div>
+                    `;
+                } else {
+                    log(`❌ Erro ao criar usuário: ${result.error}`);
+                    resultDiv.innerHTML = `<div class="error">❌ Erro: ${result.error}</div>`;
+                }
+                
+            } catch (error) {
+                log(`❌ Erro no teste: ${error.message}`);
+                resultDiv.innerHTML = `<div class="error">❌ Erro: ${error.message}</div>`;
+            }
+        };
+        
+        // 4. Teste de Firestore
+        window.testFirestoreRead = async function() {
+            const resultDiv = document.getElementById('firestoreResult');
+            resultDiv.innerHTML = '<div class="info">Testando leitura do Firestore...</div>';
+            
+            try {
+                log('🔄 Testando leitura do Firestore...');
+                
+                const { db, collection, getDocs } = await import('./firebase-config.js');
+                
+                const querySnapshot = await getDocs(collection(db, 'users'));
+                const count = querySnapshot.size;
+                
+                log(`✅ Leitura bem-sucedida. ${count} documentos encontrados.`);
+                resultDiv.innerHTML = `<div class="success">✅ Leitura OK. ${count} documentos na coleção 'users'</div>`;
+                
+            } catch (error) {
+                log(`❌ Erro na leitura: ${error.message}`);
+                resultDiv.innerHTML = `<div class="error">❌ Erro: ${error.message}</div>`;
+            }
+        };
+        
+        window.testFirestoreWrite = async function() {
+            const resultDiv = document.getElementById('firestoreResult');
+            resultDiv.innerHTML = '<div class="info">Testando escrita no Firestore...</div>';
+            
+            try {
+                log('🔄 Testando escrita no Firestore...');
+                
+                const { db, collection, addDoc } = await import('./firebase-config.js');
+                
+                const testDoc = {
+                    teste: true,
+                    timestamp: new Date(),
+                    message: 'Teste de escrita'
+                };
+                
+                const docRef = await addDoc(collection(db, 'tests'), testDoc);
+                
+                log(`✅ Escrita bem-sucedida. Doc ID: ${docRef.id}`);
+                resultDiv.innerHTML = `<div class="success">✅ Escrita OK. Documento criado: ${docRef.id}</div>`;
+                
+            } catch (error) {
+                log(`❌ Erro na escrita: ${error.message}`);
+                resultDiv.innerHTML = `<div class="error">❌ Erro: ${error.message}</div>`;
+            }
+        };
+        
+        // 5. Teste de Regras de Segurança
+        window.testSecurityRules = async function() {
+            const resultDiv = document.getElementById('securityResult');
+            resultDiv.innerHTML = '<div class="info">Verificando regras de segurança...</div>';
+            
+            try {
+                log('🔄 Verificando regras de segurança...');
+                
+                // Tentar operações que devem falhar sem auth
+                const { db, collection, getDocs } = await import('./firebase-config.js');
+                
+                // Tentar ler sem autenticação
+                await getDocs(collection(db, 'users'));
+                log('⚠️ Conseguiu ler sem autenticação - regras podem estar muito permissivas');
+                resultDiv.innerHTML = '<div class="info">⚠️ Regras permissivas detectadas</div>';
+                
+            } catch (error) {
+                if (error.code === 'permission-denied') {
+                    log('✅ Regras de segurança funcionando (acesso negado sem auth)');
+                    resultDiv.innerHTML = '<div class="success">✅ Regras de segurança OK</div>';
+                } else {
+                    log(`❌ Erro inesperado: ${error.message}`);
+                    resultDiv.innerHTML = `<div class="error">❌ Erro: ${error.message}</div>`;
+                }
+            }
+        };
+        
+        // Auto-start basic connection test
+        setTimeout(() => {
+            testBasicConnection();
+        }, 1000);
+    </script>
+</body>
+</html>

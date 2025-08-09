@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Firebase Simples</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; text-align: center; }
+        button { background: #28a745; color: white; border: none; padding: 15px 30px; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .alert { margin: 20px 0; padding: 15px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Teste Firebase Simples</h1>
+        <p>Este teste verificará se o Firebase está configurado corretamente.</p>
+        
+        <button onclick="runTest()">▶️ Executar Teste</button>
+        
+        <div id="result"></div>
+        
+        <div style="margin-top: 30px; text-align: left; background: #f8f9fa; padding: 15px; border-radius: 5px;">
+            <h3>📝 O que este teste faz:</h3>
+            <ul>
+                <li>✅ Verifica importação do Firebase</li>
+                <li>✅ Testa conexão com Authentication</li>
+                <li>✅ Tenta criar um usuário de teste</li>
+                <li>✅ Valida salvamento no Firestore</li>
+            </ul>
+            
+            <p><strong>💡 Dica:</strong> Abra o Console (F12) para ver logs detalhados!</p>
+        </div>
+    </div>
+
+    <script type="module">
+        window.runTest = async function() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="alert">🔄 Executando teste...</div>';
+            
+            console.log('🔄 Iniciando teste básico do Firebase...');
+
+            try {
+                // Teste de importação
+                const firebase = await import('./firebase-config.js');
+                console.log('✅ Firebase importado com sucesso');
+                
+                if (!firebase.firebaseService) {
+                    throw new Error('FirebaseService não encontrado');
+                }
+                
+                // Teste de criação de usuário
+                const testEmail = `teste${Date.now()}@exemplo.com`;
+                const testPassword = '123456';
+                const userData = {
+                    nome: 'Teste Usuario',
+                    tipo: 'cliente'
+                };
+                
+                console.log('🧪 Testando registro com:', { email: testEmail });
+                
+                const result = await firebase.firebaseService.signUp(testEmail, testPassword, userData);
+                
+                console.log('📊 Resultado do teste:', result);
+                
+                if (result.success) {
+                    console.log('🎉 SUCESSO! O Firebase está funcionando!');
+                    resultDiv.innerHTML = `
+                        <div class="alert success">
+                            ✅ <strong>SUCESSO!</strong><br>
+                            Firebase funcionando corretamente!<br>
+                            Usuário criado: ${testEmail}<br>
+                            UID: ${result.user.uid}
+                        </div>
+                    `;
+                } else {
+                    console.log('❌ ERRO:', result.error);
+                    resultDiv.innerHTML = `
+                        <div class="alert error">
+                            ❌ <strong>Erro no Firebase:</strong><br>
+                            ${result.error}<br><br>
+                            <small>Verifique as configurações no FIREBASE_SETUP.md</small>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.log('💥 ERRO CRÍTICO:', error);
+                resultDiv.innerHTML = `
+                    <div class="alert error">
+                        💥 <strong>Erro crítico:</strong><br>
+                        ${error.message}<br><br>
+                        <small>Verifique se o Firebase está configurado corretamente</small>
+                    </div>
+                `;
+            }
+        };
+    </script>
+</body>
+</html>

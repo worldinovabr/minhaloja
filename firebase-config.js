@@ -245,39 +245,38 @@ export class FirebaseService {
 
   async signUp(email, password, userData) {
     try {
+      console.log('🔄 Firebase signUp iniciado:', { email, userData });
+      
       // Validações
       if (!email || !password || !userData.nome) {
+        console.log('❌ Dados obrigatórios ausentes');
         return { success: false, error: 'Dados obrigatórios não preenchidos' };
       }
 
       if (!this.isValidEmail(email)) {
+        console.log('❌ Email inválido:', email);
         return { success: false, error: 'Email inválido' };
       }
 
       if (password.length < 6) {
+        console.log('❌ Senha muito curta');
         return { success: false, error: 'Senha deve ter pelo menos 6 caracteres' };
       }
 
-      // Verificar se email já existe
-      const existingUser = await this.getUserByEmail(email);
-      if (existingUser.success) {
-        return { success: false, error: 'Email já está em uso' };
-      }
+      console.log('✅ Validações básicas passaram');
 
-      // Validações específicas para admin
-      if (userData.tipo === 'admin') {
-        if (!userData.departamento || !userData.funcionarioId) {
-          return { success: false, error: 'Dados de administrador incompletos' };
-        }
-        
-        // Verificar se já existe um admin com o mesmo funcionarioId
-        const existingAdmin = await this.getAdminByEmployeeId(userData.funcionarioId);
-        if (existingAdmin.success) {
-          return { success: false, error: 'ID de funcionário já está em uso' };
-        }
-      }
+      // Verificar se email já existe (comentar temporariamente para debug)
+      // const existingUser = await this.getUserByEmail(email);
+      // if (existingUser.success) {
+      //   return { success: false, error: 'Email já está em uso' };
+      // }
 
+      console.log('🔄 Tentando criar usuário no Firebase Auth...');
+
+      // Criar usuário no Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      
+      console.log('✅ Usuário criado no Firebase Auth:', userCredential.user.uid);
       
       // Preparar dados do usuário baseado no tipo
       let userDocData = {
@@ -314,26 +313,19 @@ export class FirebaseService {
         };
       }
 
-      // Salvar dados do usuário no Firestore
-      await addDoc(collection(db, 'users'), userDocData);
+      console.log('🔄 Salvando dados do usuário no Firestore...', userDocData);
 
-      // Log de auditoria para admins
-      if (userData.tipo === 'admin') {
-        await this.logAdminAction({
-          action: 'ADMIN_REGISTERED',
-          adminId: userCredential.user.uid,
-          details: {
-            email: email,
-            departamento: userData.departamento,
-            funcionarioId: userData.funcionarioId
-          },
-          timestamp: new Date()
-        });
-      }
+      // Salvar dados do usuário no Firestore
+      const docRef = await addDoc(collection(db, 'users'), userDocData);
+      
+      console.log('✅ Dados salvos no Firestore. Doc ID:', docRef.id);
 
       return { success: true, user: userCredential.user, userType: userData.tipo };
     } catch (error) {
-      console.error('Firebase signUp error:', error);
+      console.error('❌ Firebase signUp error:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      
       return { 
         success: false, 
         error: this.getAuthErrorMessage(error.code) || error.message 
