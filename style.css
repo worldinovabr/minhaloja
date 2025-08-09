@@ -1463,15 +1463,16 @@ a:focus {
   backdrop-filter: blur(30px) !important;
   border: 1px solid rgba(255, 255, 255, 0.18) !important;
   border-radius: 32px !important;
-  padding: 3rem 2.5rem !important;
+  padding: 2.5rem 2rem !important;
   box-shadow: 
     0 35px 80px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.6),
     0 1px 0 rgba(255, 255, 255, 0.2) !important;
-  max-width: 520px !important;
-  width: 90% !important;
-  margin: 6% auto !important;
+  max-width: 400px !important;
+  width: 85% !important;
+  margin: 5% auto !important;
   min-height: auto !important;
+  max-height: 90vh !important;
   position: relative !important;
   overflow: hidden !important;
 }
@@ -1776,10 +1777,11 @@ a:focus {
 /* Responsividade para o modal de login */
 @media (max-width: 768px) {
   #login-modal .modal-content {
-    width: 95% !important;
-    margin: 5% auto !important;
-    padding: 2rem !important;
-    border-radius: 20px !important;
+    width: 92% !important;
+    max-width: 350px !important;
+    margin: 3% auto !important;
+    padding: 1.75rem 1.5rem !important;
+    border-radius: 24px !important;
   }
   
   #login-modal h2 {
@@ -1790,11 +1792,16 @@ a:focus {
   #login-modal input {
     padding: 0.875rem 1rem !important;
     font-size: 0.95rem !important;
+    margin-bottom: 1rem !important;
   }
   
   #login-modal .btn-primary {
     padding: 0.875rem !important;
     font-size: 0.95rem !important;
+  }
+  
+  #login-modal .modal-divider {
+    margin: 1.5rem 0 !important;
   }
   
   #login-modal .btn-link {
@@ -1814,19 +1821,33 @@ a:focus {
 
 @media (max-width: 480px) {
   #login-modal .modal-content {
-    width: 98% !important;
-    margin: 3% auto !important;
-    padding: 1.5rem !important;
-    border-radius: 16px !important;
+    width: 95% !important;
+    max-width: 320px !important;
+    margin: 2% auto !important;
+    padding: 1.5rem 1.25rem !important;
+    border-radius: 20px !important;
   }
   
   #login-modal h2 {
     font-size: 1.3rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+  
+  #login-modal input {
+    padding: 0.75rem 0.875rem !important;
+    font-size: 0.9rem !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  #login-modal .btn-primary {
+    padding: 0.875rem !important;
+    font-size: 0.9rem !important;
   }
   
   #login-modal .btn-link {
     min-width: 100% !important;
-    padding: 1rem !important;
+    padding: 0.875rem !important;
+    font-size: 0.85rem !important;
   }
   
   #login-modal .modal-divider {
