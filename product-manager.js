@@ -14,30 +14,71 @@ class ProductManager {
   // Inicializar produtos do Firebase
   async initializeProducts() {
     try {
+      // Mostrar loading
+      this.showLoading();
+      
       const result = await firebaseService.getProducts();
-      if (result.success) {
+      if (result.success && result.products.length > 0) {
         this.products = result.products;
-        this.renderProducts();
-        this.updateProductCount();
       } else {
-        console.error('Erro ao carregar produtos:', result.error);
-        // Fallback para produtos de exemplo se necessário
+        console.log('Nenhum produto encontrado no Firebase, carregando produtos de exemplo...');
         this.loadSampleProducts();
       }
+      
+      // Renderizar produtos
+      this.renderProducts();
+      this.loadCategories();
+      this.updateProductCount();
+      
+      // Configurar listener para atualizações em tempo real
+      this.setupRealtimeListener();
+      
     } catch (error) {
       console.error('Erro na inicialização de produtos:', error);
       this.loadSampleProducts();
-    }
-
-    // Listener para atualizações em tempo real
-    firebaseService.onProductsChange((snapshot) => {
-      this.products = [];
-      snapshot.forEach((doc) => {
-        this.products.push({ id: doc.id, ...doc.data() });
-      });
       this.renderProducts();
-      this.updateProductCount();
-    });
+      this.loadCategories();
+    } finally {
+      this.hideLoading();
+    }
+  }
+
+  // Configurar listener para atualizações em tempo real
+  setupRealtimeListener() {
+    try {
+      firebaseService.onProductsChange((snapshot) => {
+        this.products = [];
+        snapshot.forEach((doc) => {
+          this.products.push({ id: doc.id, ...doc.data() });
+        });
+        this.renderProducts();
+        this.updateProductCount();
+        console.log('Produtos atualizados em tempo real');
+      });
+    } catch (error) {
+      console.error('Erro ao configurar listener de produtos:', error);
+    }
+  }
+
+  // Mostrar loading
+  showLoading() {
+    const container = document.getElementById('products-container') || document.querySelector('.grid-produtos');
+    if (container) {
+      container.innerHTML = `
+        <div class="loading-products">
+          <div class="loading-spinner"></div>
+          <p>Carregando produtos...</p>
+        </div>
+      `;
+    }
+  }
+
+  // Esconder loading
+  hideLoading() {
+    const loadingElement = document.querySelector('.loading-products');
+    if (loadingElement) {
+      loadingElement.remove();
+    }
   }
 
   // Carregar produtos de exemplo (fallback)
@@ -161,57 +202,97 @@ class ProductManager {
 
   // Renderizar produtos na interface
   renderProducts() {
-    const productGrid = document.querySelector('.featured-products, .products-grid, .grid-produtos');
-    if (!productGrid) return;
+    const productContainers = document.querySelectorAll('.featured-products, .products-grid, .grid-produtos');
+    if (productContainers.length === 0) return;
 
     const filteredProducts = this.getFilteredProducts();
 
-    if (filteredProducts.length === 0) {
-      productGrid.innerHTML = `
-        <div class="no-products">
-          <i class="fas fa-box-open"></i>
-          <h3>Nenhum produto encontrado</h3>
-          <p>Tente ajustar os filtros ou buscar por outros termos.</p>
-        </div>
-      `;
-      return;
-    }
+    productContainers.forEach(container => {
+      if (filteredProducts.length === 0) {
+        container.innerHTML = `
+          <div class="no-products">
+            <i class="fas fa-box-open"></i>
+            <h3>Nenhum produto encontrado</h3>
+            <p>Tente ajustar os filtros ou buscar por outros termos.</p>
+            <button onclick="productManager.clearFilters()" class="btn-secondary">
+              <i class="fas fa-filter"></i> Limpar Filtros
+            </button>
+          </div>
+        `;
+        return;
+      }
 
-    productGrid.innerHTML = filteredProducts.map(product => this.createProductCard(product)).join('');
+      container.innerHTML = filteredProducts.map(product => this.createProductCard(product)).join('');
+    });
     
-    // Adicionar event listeners
+    // Adicionar event listeners para todos os produtos
     this.addProductEventListeners();
+    
+    // Atualizar contador de produtos
+    this.updateProductCount();
   }
 
-  // Criar card de produto
+  // Criar card de produto otimizado
   createProductCard(product) {
-    const stockStatus = product.estoque > 10 ? 'Em estoque' : 
-                       product.estoque > 0 ? `Últimas ${product.estoque} unidades` : 'Fora de estoque';
-    
-    const stockClass = product.estoque > 10 ? '' : product.estoque > 0 ? 'low-stock' : 'out-of-stock';
+    const stockStatus = this.getStockStatus(product.estoque);
+    const stockClass = this.getStockClass(product.estoque);
+    const isOutOfStock = product.estoque === 0;
 
     return `
-      <div class="product-card" data-product-id="${product.id}">
+      <div class="product-card ${stockClass}" data-product-id="${product.id}">
         <div class="product-image">
           <img src="${product.imagem || 'https://via.placeholder.com/300x200?text=Produto'}" 
                alt="${product.nome}" 
+               loading="lazy"
                onerror="this.src='https://via.placeholder.com/300x200?text=Produto'">
-          <div class="stock-badge ${stockClass}">${stockStatus}</div>
-        </div>
-        <div class="product-info">
-          <h3>${product.nome}</h3>
-          <p class="product-description">${product.descricao}</p>
-          <div class="product-price">R$ ${product.preco.toFixed(2)}</div>
-          <div class="product-stock">Em estoque: ${product.estoque} unidades</div>
-          <div class="product-actions">
-            <button class="btn-primary add-to-cart" 
-                    data-product-id="${product.id}"
-                    ${product.estoque === 0 ? 'disabled' : ''}>
-              <i class="fas fa-shopping-cart"></i>
-              ${product.estoque === 0 ? 'Indisponível' : 'Adicionar ao Carrinho'}
+          
+          ${product.promocao ? `<div class="product-badge sale">-${product.desconto}%</div>` : ''}
+          ${product.novo ? `<div class="product-badge new">Novo</div>` : ''}
+          
+          <div class="product-overlay">
+            <button class="btn-quick-view" data-product-id="${product.id}" title="Visualização rápida">
+              <i class="fas fa-eye"></i>
             </button>
-            <button class="btn-secondary view-details" data-product-id="${product.id}">
-              <i class="fas fa-eye"></i> Ver Detalhes
+            <button class="btn-wishlist" data-product-id="${product.id}" title="Adicionar aos favoritos">
+              <i class="fas fa-heart"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div class="product-info">
+          <div class="product-category">${product.categoria}</div>
+          <h3 class="product-name">${product.nome}</h3>
+          <p class="product-description">${product.descricao || 'Produto de qualidade premium'}</p>
+          
+          <div class="product-rating">
+            <div class="stars">
+              ${this.generateStars(product.rating || 4.5)}
+            </div>
+            <span class="rating-count">(${product.reviews || 0} avaliações)</span>
+          </div>
+          
+          <div class="product-pricing">
+            ${product.promocao ? 
+              `<span class="price-original">R$ ${product.precoOriginal?.toFixed(2) || (product.preco * 1.2).toFixed(2)}</span>` : 
+              ''
+            }
+            <span class="product-price ${product.promocao ? 'price-sale' : ''}">
+              R$ ${product.preco.toFixed(2)}
+            </span>
+          </div>
+          
+          <div class="stock-info ${stockClass}">
+            <i class="fas ${isOutOfStock ? 'fa-times-circle' : 'fa-check-circle'}"></i>
+            ${stockStatus}
+          </div>
+          
+          <div class="product-actions">
+            <button class="btn-add-cart" 
+                    data-product-id="${product.id}"
+                    ${isOutOfStock ? 'disabled' : ''}
+                    title="${isOutOfStock ? 'Produto indisponível' : 'Adicionar ao carrinho'}">
+              <i class="fas ${isOutOfStock ? 'fa-times' : 'fa-shopping-cart'}"></i>
+              ${isOutOfStock ? 'Indisponível' : 'Adicionar ao Carrinho'}
             </button>
           </div>
         </div>
@@ -219,21 +300,103 @@ class ProductManager {
     `;
   }
 
+  // Obter status do estoque
+  getStockStatus(estoque) {
+    if (estoque === 0) return 'Fora de estoque';
+    if (estoque <= 5) return `Últimas ${estoque} unidades`;
+    if (estoque <= 10) return 'Estoque baixo';
+    return 'Em estoque';
+  }
+
+  // Obter classe CSS do estoque
+  getStockClass(estoque) {
+    if (estoque === 0) return 'out-of-stock';
+    if (estoque <= 5) return 'critical-stock';
+    if (estoque <= 10) return 'low-stock';
+    return 'in-stock';
+  }
+
+  // Gerar estrelas de avaliação
+  generateStars(rating) {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    
+    let starsHTML = '';
+    
+    // Estrelas cheias
+    for (let i = 0; i < fullStars; i++) {
+      starsHTML += '<i class="fas fa-star"></i>';
+    }
+    
+    // Estrela meio cheia
+    if (hasHalfStar) {
+      starsHTML += '<i class="fas fa-star-half-alt"></i>';
+    }
+    
+    // Estrelas vazias
+    for (let i = 0; i < emptyStars; i++) {
+      starsHTML += '<i class="far fa-star"></i>';
+    }
+    
+    return starsHTML;
+  }
+
+  // Limpar filtros
+  clearFilters() {
+    this.currentFilter = { category: '', search: '', minPrice: 0, maxPrice: 10000 };
+    
+    // Limpar campos de filtro na interface
+    const categoryFilter = document.getElementById('category-filter');
+    const searchInput = document.getElementById('search-input') || document.getElementById('header-search');
+    const minPriceInput = document.getElementById('min-price');
+    const maxPriceInput = document.getElementById('max-price');
+    
+    if (categoryFilter) categoryFilter.value = '';
+    if (searchInput) searchInput.value = '';
+    if (minPriceInput) minPriceInput.value = '';
+    if (maxPriceInput) maxPriceInput.value = '';
+    
+    this.renderProducts();
+    
+    // Notificar usuário
+    if (window.authManager) {
+      authManager.showSuccess('Filtros limpos com sucesso!');
+    }
+  }
+
+  // Atualizar contador de produtos
+  updateProductCount() {
+    const productCount = document.querySelector('.product-count');
+    if (productCount) {
+      const filteredProducts = this.getFilteredProducts();
+      productCount.textContent = `${filteredProducts.length} produtos encontrados`;
+    }
+  }
+
   // Adicionar event listeners aos produtos
   addProductEventListeners() {
     // Botões de adicionar ao carrinho
-    document.querySelectorAll('.add-to-cart').forEach(btn => {
+    document.querySelectorAll('.btn-add-cart').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const productId = e.target.dataset.productId;
+        const productId = e.target.closest('button').dataset.productId;
         this.addToCart(productId);
       });
     });
 
-    // Botões de ver detalhes
-    document.querySelectorAll('.view-details').forEach(btn => {
+    // Botões de visualização rápida
+    document.querySelectorAll('.btn-quick-view').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const productId = e.target.dataset.productId;
+        const productId = e.target.closest('button').dataset.productId;
         this.showProductDetails(productId);
+      });
+    });
+
+    // Botões de favoritos
+    document.querySelectorAll('.btn-wishlist').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const productId = e.target.closest('button').dataset.productId;
+        this.toggleWishlist(productId);
       });
     });
   }
@@ -242,12 +405,16 @@ class ProductManager {
   addToCart(productId, quantity = 1) {
     const product = this.products.find(p => p.id === productId);
     if (!product) {
-      authManager.showError('Produto não encontrado');
+      if (window.authManager) {
+        authManager.showError('Produto não encontrado');
+      }
       return;
     }
 
     if (product.estoque === 0) {
-      authManager.showError('Produto fora de estoque');
+      if (window.authManager) {
+        authManager.showError('Produto fora de estoque');
+      }
       return;
     }
 
@@ -256,13 +423,17 @@ class ProductManager {
     
     if (existingItem) {
       if (existingItem.quantity + quantity > product.estoque) {
-        authManager.showError('Quantidade indisponível em estoque');
+        if (window.authManager) {
+          authManager.showError('Quantidade indisponível em estoque');
+        }
         return;
       }
       existingItem.quantity += quantity;
     } else {
       if (quantity > product.estoque) {
-        authManager.showError('Quantidade indisponível em estoque');
+        if (window.authManager) {
+          authManager.showError('Quantidade indisponível em estoque');
+        }
         return;
       }
       this.cart.push({
@@ -276,7 +447,10 @@ class ProductManager {
 
     this.saveCart();
     this.updateCartUI();
-    authManager.showSuccess(`${product.nome} adicionado ao carrinho!`);
+    
+    if (window.authManager) {
+      authManager.showSuccess(`${product.nome} adicionado ao carrinho!`);
+    }
   }
 
   // Mostrar detalhes do produto
@@ -344,19 +518,54 @@ class ProductManager {
     
     if (cartCount) {
       cartCount.textContent = totalItems;
-      if (totalItems > 0) {
-        cartCount.style.display = 'inline';
-      } else {
-        cartCount.style.display = 'none';
-      }
+      cartCount.style.display = totalItems > 0 ? 'inline' : 'none';
+    }
+
+    // Atualizar badge do carrinho
+    const cartBadge = document.querySelector('.cart-badge');
+    if (cartBadge) {
+      cartBadge.textContent = totalItems;
+      cartBadge.style.display = totalItems > 0 ? 'inline' : 'none';
     }
   }
 
-  updateProductCount() {
-    const productCount = document.querySelector('.product-count');
-    if (productCount) {
-      productCount.textContent = `${this.products.length} produtos encontrados`;
+  // Adicionar/remover dos favoritos
+  toggleWishlist(productId) {
+    const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    const index = wishlist.indexOf(productId);
+    
+    if (index > -1) {
+      wishlist.splice(index, 1);
+      if (window.authManager) {
+        authManager.showSuccess('Produto removido dos favoritos');
+      }
+    } else {
+      wishlist.push(productId);
+      if (window.authManager) {
+        authManager.showSuccess('Produto adicionado aos favoritos');
+      }
     }
+    
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    this.updateWishlistUI();
+  }
+
+  // Atualizar interface dos favoritos
+  updateWishlistUI() {
+    const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    
+    document.querySelectorAll('.btn-wishlist').forEach(btn => {
+      const productId = btn.dataset.productId;
+      const icon = btn.querySelector('i');
+      
+      if (wishlist.includes(productId)) {
+        icon.className = 'fas fa-heart';
+        btn.classList.add('active');
+      } else {
+        icon.className = 'far fa-heart';
+        btn.classList.remove('active');
+      }
+    });
   }
 
   // Obter dados do carrinho
@@ -372,55 +581,6 @@ class ProductManager {
   }
 }
 
-// CSS adicional para produtos
-const productStyles = `
-  .no-products {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 3rem;
-    color: #666;
-  }
-
-  .no-products i {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    opacity: 0.5;
-  }
-
-  .product-actions {
-    display: flex;
-    gap: 0.5rem;
-    flex-direction: column;
-  }
-
-  .product-actions button {
-    flex: 1;
-    white-space: nowrap;
-  }
-
-  .stock-badge.out-of-stock {
-    background: linear-gradient(135deg, #dc3545, #c82333);
-  }
-
-  .stock-badge.low-stock {
-    background: linear-gradient(135deg, #ffc107, #e0a800);
-    color: #000;
-  }
-
-  .product-count {
-    color: #666;
-    font-style: italic;
-    margin-bottom: 1rem;
-  }
-`;
-
-// Adicionar estilos
-const styleElement = document.createElement('style');
-styleElement.textContent = productStyles;
-document.head.appendChild(styleElement);
-
-// Criar instância global
-window.productManager = new ProductManager();
-
-export { ProductManager };
+// Inicializar Product Manager
+const productManager = new ProductManager();
 export default window.productManager;

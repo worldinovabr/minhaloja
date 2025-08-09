@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="animations.css">
     <link rel="stylesheet" href="header-responsive.css">
     <link rel="stylesheet" href="cart-modal.css">
+    <link rel="stylesheet" href="product-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
       <script type="module" src="firebase-config.js"></script>
@@ -415,6 +416,7 @@
       // Ocultar todas as seções
       document.querySelectorAll('.section').forEach(section => {
         section.classList.remove('active');
+        section.style.display = 'none';
       });
       
       // Mostrar seção selecionada
@@ -422,6 +424,14 @@
       if (targetSection) {
         targetSection.classList.add('active');
         targetSection.style.display = 'block';
+        
+        // Carregar conteúdo específico da seção se necessário
+        loadSectionContent(sectionName);
+        
+        // Atualizar URL sem recarregar página
+        if (history.pushState) {
+          history.pushState({}, '', `#${sectionName}`);
+        }
       }
       
       // Scroll suave para o topo
@@ -429,26 +439,221 @@
         top: 0,
         behavior: 'smooth'
       });
-      
-      // Ações específicas por seção
+    }
+    
+    // Carregar conteúdo específico por seção
+    function loadSectionContent(sectionName) {
       switch(sectionName) {
         case 'produtos':
-          loadProductsSection();
-          break;
-        case 'inicio':
-          loadHomeSection();
+          if (window.productManager) {
+            productManager.renderProducts();
+            productManager.loadCategories();
+          }
           break;
         case 'sobre':
-          loadAboutSection();
+          loadAboutContent();
           break;
         case 'contato':
-          loadContactSection();
+          loadContactContent();
+          break;
+        default:
           break;
       }
+    }
+    
+    // Carregar conteúdo da seção sobre
+    function loadAboutContent() {
+      const aboutSection = document.getElementById('sobre');
+      if (aboutSection && !aboutSection.querySelector('.about-content')) {
+        aboutSection.innerHTML = `
+          <div class="about-content">
+            <div class="about-header">
+              <h2>Sobre Nossa Loja</h2>
+              <p class="about-subtitle">Conheça nossa história e valores</p>
+            </div>
+            
+            <div class="about-grid">
+              <div class="about-card">
+                <div class="about-icon">
+                  <i class="fas fa-heart"></i>
+                </div>
+                <h3>Nossa Missão</h3>
+                <p>Oferecer produtos de qualidade com o melhor atendimento, sempre buscando a satisfação total dos nossos clientes.</p>
+              </div>
+              
+              <div class="about-card">
+                <div class="about-icon">
+                  <i class="fas fa-eye"></i>
+                </div>
+                <h3>Nossa Visão</h3>
+                <p>Ser referência no mercado online, reconhecida pela excelência em produtos e serviços diferenciados.</p>
+              </div>
+              
+              <div class="about-card">
+                <div class="about-icon">
+                  <i class="fas fa-star"></i>
+                </div>
+                <h3>Nossos Valores</h3>
+                <p>Qualidade, confiança, inovação e compromisso com a sustentabilidade em todos os nossos processos.</p>
+              </div>
+            </div>
+            
+            <div class="about-stats">
+              <div class="stat-item">
+                <div class="stat-number">5000+</div>
+                <div class="stat-label">Clientes Satisfeitos</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">1000+</div>
+                <div class="stat-label">Produtos Vendidos</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">99%</div>
+                <div class="stat-label">Satisfação dos Clientes</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Atendimento</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+    
+    // Carregar conteúdo da seção contato
+    function loadContactContent() {
+      const contactSection = document.getElementById('contato');
+      if (contactSection && !contactSection.querySelector('.contact-content')) {
+        contactSection.innerHTML = `
+          <div class="contact-content">
+            <div class="contact-header">
+              <h2>Entre em Contato</h2>
+              <p class="contact-subtitle">Estamos aqui para ajudar você!</p>
+            </div>
+            
+            <div class="contact-grid">
+              <div class="contact-info">
+                <h3>Fale Conosco</h3>
+                
+                <div class="contact-item">
+                  <i class="fas fa-phone"></i>
+                  <div>
+                    <strong>Telefone</strong>
+                    <p>(11) 99999-9999</p>
+                  </div>
+                </div>
+                
+                <div class="contact-item">
+                  <i class="fas fa-envelope"></i>
+                  <div>
+                    <strong>Email</strong>
+                    <p>contato@minhaloja.com</p>
+                  </div>
+                </div>
+                
+                <div class="contact-item">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <div>
+                    <strong>Endereço</strong>
+                    <p>Rua das Flores, 123<br>Centro - São Paulo, SP</p>
+                  </div>
+                </div>
+                
+                <div class="contact-item">
+                  <i class="fas fa-clock"></i>
+                  <div>
+                    <strong>Horário de Atendimento</strong>
+                    <p>Segunda a Sexta: 9h às 18h<br>Sábado: 9h às 14h</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="contact-form-container">
+                <h3>Envie sua Mensagem</h3>
+                <form id="contact-form" class="contact-form">
+                  <div class="form-group">
+                    <label for="contact-name">Nome:</label>
+                    <input type="text" id="contact-name" name="name" required>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="contact-email">Email:</label>
+                    <input type="email" id="contact-email" name="email" required>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="contact-subject">Assunto:</label>
+                    <select id="contact-subject" name="subject" required>
+                      <option value="">Selecione o assunto</option>
+                      <option value="duvida">Dúvida sobre produto</option>
+                      <option value="pedido">Acompanhar pedido</option>
+                      <option value="troca">Troca/Devolução</option>
+                      <option value="sugestao">Sugestão</option>
+                      <option value="outro">Outro</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="contact-message">Mensagem:</label>
+                    <textarea id="contact-message" name="message" rows="5" required placeholder="Digite sua mensagem aqui..."></textarea>
+                  </div>
+                  
+                  <button type="submit" class="btn-primary">
+                    <i class="fas fa-paper-plane"></i> Enviar Mensagem
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // Adicionar event listener para o formulário de contato
+        const contactForm = document.getElementById('contact-form');
+        if (contactForm) {
+          contactForm.addEventListener('submit', handleContactForm);
+        }
+      }
+    }
+    
+    // Manipular envio do formulário de contato
+    function handleContactForm(e) {
+      e.preventDefault();
       
-      // Atualizar URL sem recarregar página
-      if (history.pushState) {
-        history.pushState(null, null, '#' + sectionName);
+      const formData = new FormData(e.target);
+      const contactData = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        subject: formData.get('subject'),
+        message: formData.get('message'),
+        timestamp: new Date().toISOString()
+      };
+      
+      // Simular envio (aqui você integraria com um serviço real)
+      console.log('Dados do contato:', contactData);
+      
+      // Feedback para o usuário
+      if (window.authManager) {
+        authManager.showSuccess('Mensagem enviada com sucesso! Retornaremos em breve.');
+      } else {
+        alert('Mensagem enviada com sucesso! Retornaremos em breve.');
+      }
+      
+      // Limpar formulário
+      e.target.reset();
+    }
+    
+    // Função para definir link ativo na navegação
+    function setActiveNavLink(sectionName) {
+      // Remover classe ativa de todos os links
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+      });
+      
+      // Adicionar classe ativa ao link correspondente
+      const targetLink = document.querySelector(`[href="#${sectionName}"]`);
+      if (targetLink) {
+        targetLink.classList.add('active');
       }
     }
     
@@ -1327,6 +1532,238 @@
   
   <!-- CSS adicional para as novas funcionalidades -->
   <style>
+    /* Estilos para seção Sobre */
+    .about-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    .about-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .about-header h2 {
+      font-size: 2.5rem;
+      color: #333;
+      margin-bottom: 1rem;
+    }
+    
+    .about-subtitle {
+      font-size: 1.2rem;
+      color: #666;
+    }
+    
+    .about-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+    
+    .about-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+    
+    .about-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .about-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+    }
+    
+    .about-icon i {
+      font-size: 2rem;
+      color: white;
+    }
+    
+    .about-card h3 {
+      color: #333;
+      margin-bottom: 1rem;
+    }
+    
+    .about-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 3rem;
+      border-radius: 15px;
+      color: white;
+    }
+    
+    .stat-item {
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+    
+    /* Estilos para seção Contato */
+    .contact-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    .contact-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .contact-header h2 {
+      font-size: 2.5rem;
+      color: #333;
+      margin-bottom: 1rem;
+    }
+    
+    .contact-subtitle {
+      font-size: 1.2rem;
+      color: #666;
+    }
+    
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+    }
+    
+    .contact-info h3 {
+      color: #333;
+      margin-bottom: 2rem;
+      font-size: 1.5rem;
+    }
+    
+    .contact-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .contact-item i {
+      font-size: 1.5rem;
+      color: #667eea;
+      width: 30px;
+      flex-shrink: 0;
+      margin-top: 0.2rem;
+    }
+    
+    .contact-item strong {
+      color: #333;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    
+    .contact-item p {
+      color: #666;
+      margin: 0;
+      line-height: 1.5;
+    }
+    
+    .contact-form-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .contact-form-container h3 {
+      color: #333;
+      margin-bottom: 2rem;
+      font-size: 1.5rem;
+    }
+    
+    .contact-form .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .contact-form label {
+      display: block;
+      color: #333;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .contact-form input,
+    .contact-form select,
+    .contact-form textarea {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+    }
+    
+    .contact-form input:focus,
+    .contact-form select:focus,
+    .contact-form textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 2px rgba(102,126,234,0.25);
+    }
+    
+    .contact-form textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+    
+    /* Responsividade */
+    @media (max-width: 768px) {
+      .about-stats {
+        grid-template-columns: repeat(2, 1fr);
+        padding: 2rem;
+      }
+      
+      .stat-number {
+        font-size: 2rem;
+      }
+      
+      .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+      
+      .about-header h2,
+      .contact-header h2 {
+        font-size: 2rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .about-stats {
+        grid-template-columns: 1fr;
+      }
+      
+      .about-content,
+      .contact-content {
+        padding: 1rem;
+      }
+    }
+  </style>
     /* Estilos para produtos */
     .products-grid {
       display: grid;
@@ -1713,9 +2150,9 @@
                     <p>R$ ${item.preco.toFixed(2)} cada</p>
                   </div>
                   <div class="quantity-controls">
-                    <button onclick="updateCartQuantity(&#39;${item.id}&#39;, ${decreaseQty})">-</button>
+                    <button class="btn-qty-decrease" data-id="${item.id}">-</button>
                     <span>${item.quantity}</span>
-                    <button onclick="updateCartQuantity(&#39;${item.id}&#39;, ${increaseQty})">+</button>
+                    <button class="btn-qty-increase" data-id="${item.id}">+</button>
                   </div>
                   <div class="item-total">R$ ${(item.preco * item.quantity).toFixed(2)}</div>
                   <button class="btn-remove" onclick="removeFromCart('${item.id}')">&times;</button>

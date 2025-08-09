@@ -162,16 +162,27 @@ class AuthManager {
         return { success: false, error: 'Nome inválido' };
       }
 
-      // Validar telefone se fornecido
-      if (userData.telefone && !this.isValidPhone(userData.telefone)) {
-        this.showError('Formato de telefone inválido');
-        return { success: false, error: 'Telefone inválido' };
+      // Validações específicas por tipo de usuário
+      if (userData.tipo === 'cliente') {
+        // Validar telefone se fornecido
+        if (userData.telefone && !this.isValidPhone(userData.telefone)) {
+          this.showError('Formato de telefone inválido');
+          return { success: false, error: 'Telefone inválido' };
+        }
+
+        // Validar CEP se fornecido
+        if (userData.cep && !this.isValidCEP(userData.cep)) {
+          this.showError('Formato de CEP inválido');
+          return { success: false, error: 'CEP inválido' };
+        }
       }
 
-      // Validar CEP se fornecido
-      if (userData.cep && !this.isValidCEP(userData.cep)) {
-        this.showError('Formato de CEP inválido');
-        return { success: false, error: 'CEP inválido' };
+      if (userData.tipo === 'admin') {
+        // Validar campos específicos de admin
+        if (!userData.departamento) {
+          this.showError('Departamento é obrigatório para administradores');
+          return { success: false, error: 'Departamento obrigatório' };
+        }
       }
 
       const result = await firebaseService.signUp(email, password, userData);
@@ -179,9 +190,13 @@ class AuthManager {
       if (result.success) {
         this.showSuccess('Conta criada com sucesso!');
         
-        // Auto login após registro
+        // Redirecionar baseado no tipo de usuário
         setTimeout(() => {
-          window.location.href = 'client.html';
+          if (userData.tipo === 'admin') {
+            window.location.href = 'admin.html';
+          } else {
+            window.location.href = 'client.html';
+          }
         }, 1500);
         
         return { success: true };
