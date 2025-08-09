@@ -9,6 +9,177 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script type="module" src="firebase-config.js"></script>
   <script type="module" src="auth-manager.js"></script>
+  
+  <style>
+    /* Estilos específicos para o sistema de cadastro */
+    .register-options {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      margin: 2rem 0;
+    }
+    
+    .register-option-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 15px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 200px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .register-option-btn:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+    
+    .register-option-btn i {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+    
+    .register-option-btn h3 {
+      margin: 1rem 0 0.5rem 0;
+      font-size: 1.3rem;
+    }
+    
+    .register-option-btn p {
+      margin: 0;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+    
+    .client-fields, .admin-fields {
+      border-top: 2px solid #f0f0f0;
+      padding-top: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    
+    .admin-fields {
+      background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+      padding: 1.5rem;
+      border-radius: 10px;
+      margin-top: 1rem;
+    }
+    
+    .admin-fields .form-group label {
+      color: #2d3436;
+      font-weight: 600;
+    }
+    
+    .terms-group {
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #28a745;
+    }
+    
+    .terms-group label {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    
+    .terms-group input[type="checkbox"] {
+      margin-top: 0.1rem;
+      flex-shrink: 0;
+    }
+    
+    .terms-group a {
+      color: #007bff;
+      text-decoration: none;
+    }
+    
+    .terms-group a:hover {
+      text-decoration: underline;
+    }
+    
+    #registerSubmitBtn {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 25px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      margin-top: 1rem;
+    }
+    
+    #registerSubmitBtn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #218838 0%, #1ea080 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(40,167,69,0.3);
+    }
+    
+    #registerSubmitBtn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    /* Responsividade para opções de cadastro */
+    @media (max-width: 768px) {
+      .register-options {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .register-option-btn {
+        min-width: 250px;
+      }
+    }
+    
+    /* Animações */
+    .modal {
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .modal-content {
+      animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes slideDown {
+      from { 
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Validação visual dos campos */
+    .form-group input:valid {
+      border-color: #28a745;
+    }
+    
+    .form-group input:invalid:not(:placeholder-shown) {
+      border-color: #dc3545;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+    }
+  </style>
 </head>
 <body>
   <div class="login-container">
@@ -40,7 +211,27 @@
       </form>
       
       <div class="register-link">
-        <p>Não tem conta? <a href="#" onclick="showRegisterForm()">Cadastre-se</a></p>
+        <p>Não tem conta? <a href="#" onclick="showRegisterOptions()">Cadastre-se</a></p>
+      </div>
+    </div>
+    
+    <!-- Modal de Opções de Cadastro -->
+    <div id="registerOptionsModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeRegisterOptionsModal()">&times;</span>
+        <h2>Escolha o Tipo de Cadastro</h2>
+        <div class="register-options">
+          <button class="register-option-btn" onclick="showRegisterForm('cliente')">
+            <i class="fas fa-user"></i>
+            <h3>Cadastro de Cliente</h3>
+            <p>Para realizar compras e acompanhar pedidos</p>
+          </button>
+          <button class="register-option-btn" onclick="showRegisterForm('admin')">
+            <i class="fas fa-user-shield"></i>
+            <h3>Cadastro de Administrador</h3>
+            <p>Para gerenciar produtos e vendas</p>
+          </button>
+        </div>
       </div>
     </div>
     
@@ -48,8 +239,10 @@
     <div id="registerModal" class="modal">
       <div class="modal-content">
         <span class="close" onclick="closeRegisterModal()">&times;</span>
-        <h2>Cadastro de Cliente</h2>
+        <h2 id="registerTitle">Cadastro</h2>
         <form id="registerForm" class="register-form">
+          <input type="hidden" id="userTypeReg" name="userType" value="">
+          
           <div class="form-group">
             <label for="regName">Nome Completo:</label>
             <input type="text" id="regName" name="name" required>
@@ -62,30 +255,68 @@
           
           <div class="form-group">
             <label for="regPassword">Senha:</label>
-            <input type="password" id="regPassword" name="password" required>
+            <input type="password" id="regPassword" name="password" required minlength="6">
           </div>
           
           <div class="form-group">
-            <label for="regPhone">Telefone:</label>
-            <input type="tel" id="regPhone" name="phone" required>
+            <label for="regConfirmPassword">Confirmar Senha:</label>
+            <input type="password" id="regConfirmPassword" name="confirmPassword" required>
           </div>
           
-          <div class="form-group">
-            <label for="regAddress">Endereço:</label>
-            <input type="text" id="regAddress" name="address" required>
+          <div id="clientFields" class="client-fields">
+            <div class="form-group">
+              <label for="regPhone">Telefone:</label>
+              <input type="tel" id="regPhone" name="phone">
+            </div>
+            
+            <div class="form-group">
+              <label for="regAddress">Endereço:</label>
+              <input type="text" id="regAddress" name="address">
+            </div>
+            
+            <div class="form-group">
+              <label for="regCity">Cidade:</label>
+              <input type="text" id="regCity" name="city">
+            </div>
+            
+            <div class="form-group">
+              <label for="regCep">CEP:</label>
+              <input type="text" id="regCep" name="cep" pattern="[0-9]{5}-?[0-9]{3}">
+            </div>
           </div>
           
-          <div class="form-group">
-            <label for="regCity">Cidade:</label>
-            <input type="text" id="regCity" name="city" required>
+          <div id="adminFields" class="admin-fields" style="display: none;">
+            <div class="form-group">
+              <label for="regDepartment">Departamento:</label>
+              <select id="regDepartment" name="department">
+                <option value="">Selecione...</option>
+                <option value="vendas">Vendas</option>
+                <option value="marketing">Marketing</option>
+                <option value="estoque">Estoque</option>
+                <option value="financeiro">Financeiro</option>
+                <option value="geral">Administração Geral</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="regAdminCode">Código de Administrador:</label>
+              <input type="password" id="regAdminCode" name="adminCode" placeholder="Código fornecido pela empresa">
+            </div>
+            
+            <div class="form-group">
+              <label for="regEmployee">Número de Funcionário:</label>
+              <input type="text" id="regEmployee" name="employeeId" placeholder="ID do funcionário">
+            </div>
           </div>
           
-          <div class="form-group">
-            <label for="regCep">CEP:</label>
-            <input type="text" id="regCep" name="cep" required>
+          <div class="terms-group">
+            <label>
+              <input type="checkbox" id="acceptTerms" required>
+              Aceito os <a href="#" onclick="showTerms()">termos de uso</a> e <a href="#" onclick="showPrivacy()">política de privacidade</a>
+            </label>
           </div>
           
-          <button type="submit">Cadastrar</button>
+          <button type="submit" id="registerSubmitBtn">Cadastrar</button>
         </form>
       </div>
     </div>
@@ -130,41 +361,210 @@
         e.preventDefault();
         
         const formData = new FormData(registerForm);
-        const userData = {
-          nome: formData.get('name'),
-          telefone: formData.get('phone'),
-          endereco: formData.get('address'),
-          cidade: formData.get('city'),
-          cep: formData.get('cep')
-        };
-        
+        const userType = formData.get('userType');
         const email = formData.get('email');
         const password = formData.get('password');
+        const confirmPassword = formData.get('confirmPassword');
+        const name = formData.get('name');
         
-        if (!email || !password || !userData.nome) {
+        // Validações básicas
+        if (!email || !password || !name || !userType) {
           alert('Por favor, preencha todos os campos obrigatórios');
           return;
         }
         
-        // Registrar via Firebase
-        await authManager.register(email, password, userData);
+        if (password !== confirmPassword) {
+          alert('As senhas não coincidem');
+          return;
+        }
+        
+        if (password.length < 6) {
+          alert('A senha deve ter pelo menos 6 caracteres');
+          return;
+        }
+        
+        // Validações específicas por tipo de usuário
+        if (userType === 'cliente') {
+          const phone = formData.get('phone');
+          const address = formData.get('address');
+          const city = formData.get('city');
+          const cep = formData.get('cep');
+          
+          if (!phone || !address || !city || !cep) {
+            alert('Por favor, preencha todos os campos de endereço para clientes');
+            return;
+          }
+          
+          // Validar formato do CEP
+          const cepRegex = /^[0-9]{5}-?[0-9]{3}$/;
+          if (!cepRegex.test(cep)) {
+            alert('Por favor, insira um CEP válido (formato: 12345-678)');
+            return;
+          }
+        }
+        
+        if (userType === 'admin') {
+          const department = formData.get('department');
+          const adminCode = formData.get('adminCode');
+          
+          if (!department || !adminCode) {
+            alert('Por favor, preencha o departamento e código de administrador');
+            return;
+          }
+          
+          // Verificar código de administrador (código simples para demonstração)
+          const validAdminCodes = ['ADMIN2024', 'MANAGER123', 'SUPERVISOR456'];
+          if (!validAdminCodes.includes(adminCode)) {
+            alert('Código de administrador inválido. Entre em contato com a administração.');
+            return;
+          }
+        }
+        
+        // Verificar se aceita os termos
+        if (!document.getElementById('acceptTerms').checked) {
+          alert('Você deve aceitar os termos de uso e política de privacidade');
+          return;
+        }
+        
+        // Preparar dados do usuário
+        let userData = {
+          nome: name,
+          email: email,
+          tipo: userType,
+          dataCadastro: new Date().toISOString()
+        };
+        
+        if (userType === 'cliente') {
+          userData = {
+            ...userData,
+            telefone: formData.get('phone'),
+            endereco: formData.get('address'),
+            cidade: formData.get('city'),
+            cep: formData.get('cep')
+          };
+        } else if (userType === 'admin') {
+          userData = {
+            ...userData,
+            departamento: formData.get('department'),
+            funcionarioId: formData.get('employeeId') || 'ADM-' + Date.now(),
+            permissoes: ['read', 'write', 'delete'] // Permissões básicas de admin
+          };
+        }
+        
+        try {
+          // Mostrar loading
+          const submitBtn = document.getElementById('registerSubmitBtn');
+          const originalText = submitBtn.textContent;
+          submitBtn.textContent = 'Cadastrando...';
+          submitBtn.disabled = true;
+          
+          // Registrar via Firebase
+          await authManager.register(email, password, userData);
+          
+          // Sucesso
+          alert('Cadastro realizado com sucesso! Você pode fazer login agora.');
+          closeRegisterModal();
+          
+          // Resetar botão
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
+          
+        } catch (error) {
+          console.error('Erro no cadastro:', error);
+          alert('Erro ao realizar cadastro: ' + (error.message || 'Tente novamente'));
+          
+          // Resetar botão
+          const submitBtn = document.getElementById('registerSubmitBtn');
+          submitBtn.textContent = submitBtn.textContent.replace('Cadastrando...', 'Cadastrar');
+          submitBtn.disabled = false;
+        }
       });
     });
     
-    // Funções globais para o modal
-    window.showRegisterForm = function() {
+    // Funções globais para os modais
+    window.showRegisterOptions = function() {
+      document.getElementById('registerOptionsModal').style.display = 'block';
+    };
+    
+    window.closeRegisterOptionsModal = function() {
+      document.getElementById('registerOptionsModal').style.display = 'none';
+    };
+    
+    window.showRegisterForm = function(userType) {
+      // Fechar modal de opções
+      closeRegisterOptionsModal();
+      
+      // Configurar formulário baseado no tipo de usuário
+      const registerTitle = document.getElementById('registerTitle');
+      const userTypeInput = document.getElementById('userTypeReg');
+      const clientFields = document.getElementById('clientFields');
+      const adminFields = document.getElementById('adminFields');
+      const submitBtn = document.getElementById('registerSubmitBtn');
+      
+      userTypeInput.value = userType;
+      
+      if (userType === 'cliente') {
+        registerTitle.textContent = 'Cadastro de Cliente';
+        clientFields.style.display = 'block';
+        adminFields.style.display = 'none';
+        submitBtn.textContent = 'Cadastrar como Cliente';
+        
+        // Tornar campos de cliente obrigatórios
+        document.getElementById('regPhone').required = true;
+        document.getElementById('regAddress').required = true;
+        document.getElementById('regCity').required = true;
+        document.getElementById('regCep').required = true;
+        
+        // Remover obrigatoriedade dos campos admin
+        document.getElementById('regDepartment').required = false;
+        document.getElementById('regAdminCode').required = false;
+        
+      } else if (userType === 'admin') {
+        registerTitle.textContent = 'Cadastro de Administrador';
+        clientFields.style.display = 'none';
+        adminFields.style.display = 'block';
+        submitBtn.textContent = 'Cadastrar como Administrador';
+        
+        // Remover obrigatoriedade dos campos cliente
+        document.getElementById('regPhone').required = false;
+        document.getElementById('regAddress').required = false;
+        document.getElementById('regCity').required = false;
+        document.getElementById('regCep').required = false;
+        
+        // Tornar campos admin obrigatórios
+        document.getElementById('regDepartment').required = true;
+        document.getElementById('regAdminCode').required = true;
+      }
+      
+      // Mostrar modal de cadastro
       document.getElementById('registerModal').style.display = 'block';
     };
     
     window.closeRegisterModal = function() {
       document.getElementById('registerModal').style.display = 'none';
+      // Limpar formulário
+      document.getElementById('registerForm').reset();
+    };
+    
+    window.showTerms = function() {
+      alert('Termos de Uso:\n\n1. Aceito usar o sistema de forma responsável\n2. Não compartilharei minha conta com terceiros\n3. Manterei meus dados atualizados\n4. Seguirei as políticas da loja');
+    };
+    
+    window.showPrivacy = function() {
+      alert('Política de Privacidade:\n\n1. Seus dados pessoais serão protegidos\n2. Não compartilhamos informações com terceiros\n3. Usamos cookies para melhorar a experiência\n4. Você pode solicitar exclusão dos seus dados a qualquer momento');
     };
     
     // Fechar modal clicando fora
     window.onclick = function(event) {
-      const modal = document.getElementById('registerModal');
-      if (event.target === modal) {
-        modal.style.display = 'none';
+      const registerModal = document.getElementById('registerModal');
+      const optionsModal = document.getElementById('registerOptionsModal');
+      
+      if (event.target === registerModal) {
+        registerModal.style.display = 'none';
+      }
+      
+      if (event.target === optionsModal) {
+        optionsModal.style.display = 'none';
       }
     };
   </script>

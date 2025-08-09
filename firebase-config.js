@@ -264,25 +264,74 @@ export class FirebaseService {
         return { success: false, error: 'Email já está em uso' };
       }
 
+      // Validações específicas para admin
+      if (userData.tipo === 'admin') {
+        if (!userData.departamento || !userData.funcionarioId) {
+          return { success: false, error: 'Dados de administrador incompletos' };
+        }
+        
+        // Verificar se já existe um admin com o mesmo funcionarioId
+        const existingAdmin = await this.getAdminByEmployeeId(userData.funcionarioId);
+        if (existingAdmin.success) {
+          return { success: false, error: 'ID de funcionário já está em uso' };
+        }
+      }
+
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       
-      // Salvar dados adicionais do usuário no Firestore
-      await addDoc(collection(db, 'users'), {
+      // Preparar dados do usuário baseado no tipo
+      let userDocData = {
         uid: userCredential.user.uid,
         email: email,
         nome: userData.nome,
-        telefone: userData.telefone || '',
-        endereco: userData.endereco || '',
-        cidade: userData.cidade || '',
-        cep: userData.cep || '',
-        role: 'cliente', // Por padrão, novos usuários são clientes
+        role: userData.tipo || 'cliente',
         ativo: true,
         createdAt: new Date(),
         updatedAt: new Date(),
         lastLogin: new Date()
-      });
+      };
 
-      return { success: true, user: userCredential.user };
+      // Adicionar campos específicos baseado no tipo
+      if (userData.tipo === 'cliente') {
+        userDocData = {
+          ...userDocData,
+          telefone: userData.telefone || '',
+          endereco: userData.endereco || '',
+          cidade: userData.cidade || '',
+          cep: userData.cep || '',
+          compras: [],
+          wishlist: [],
+          enderecosEntrega: []
+        };
+      } else if (userData.tipo === 'admin') {
+        userDocData = {
+          ...userDocData,
+          departamento: userData.departamento,
+          funcionarioId: userData.funcionarioId,
+          permissoes: userData.permissoes || ['read', 'write'],
+          nivel: 'administrador',
+          ultimoAcesso: new Date()
+        };
+      }
+
+      // Salvar dados do usuário no Firestore
+      await addDoc(collection(db, 'users'), userDocData);
+
+      // Log de auditoria para admins
+      if (userData.tipo === 'admin') {
+        await this.logAdminAction({
+          action: 'ADMIN_REGISTERED',
+          adminId: userCredential.user.uid,
+          details: {
+            email: email,
+            departamento: userData.departamento,
+            funcionarioId: userData.funcionarioId
+          },
+          timestamp: new Date()
+        });
+      }
+
+      return { success: true, user: userCredential.user, userType: userData.tipo };
     } catch (error) {
       return { 
         success: false, 
@@ -328,6 +377,82 @@ export class FirebaseService {
     try {
       await signOut(auth);
       return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Função para verificar admin por ID de funcionário
+  async getAdminByEmployeeId(employeeId) {
+    try {
+      const usersQuery = query(
+        collection(db, 'users'), 
+        where('funcionarioId', '==', employeeId),
+        where('role', '==', 'admin')
+      );
+      const querySnapshot = await getDocs(usersQuery);
+      
+      if (!querySnapshot.empty) {
+        const adminDoc = querySnapshot.docs[0];
+        return { 
+          success: true, 
+          admin: { id: adminDoc.id, ...adminDoc.data() } 
+        };
+      }
+      
+      return { success: false, message: 'Admin não encontrado' };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Função para log de ações de admin
+  async logAdminAction(actionData) {
+    try {
+      await addDoc(collection(db, 'admin_logs'), {
+        ...actionData,
+        timestamp: new Date()
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Erro ao registrar log de admin:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Função para verificar se um usuário é admin
+  async isUserAdmin(uid) {
+    try {
+      const userQuery = query(
+        collection(db, 'users'), 
+        where('uid', '==', uid),
+        where('role', '==', 'admin'),
+        where('ativo', '==', true)
+      );
+      const querySnapshot = await getDocs(userQuery);
+      
+      return !querySnapshot.empty;
+    } catch (error) {
+      console.error('Erro ao verificar admin:', error);
+      return false;
+    }
+  }
+
+  // Função para obter dados completos do usuário por UID
+  async getUserByUID(uid) {
+    try {
+      const usersQuery = query(collection(db, 'users'), where('uid', '==', uid));
+      const querySnapshot = await getDocs(usersQuery);
+      
+      if (!querySnapshot.empty) {
+        const userDoc = querySnapshot.docs[0];
+        return { 
+          success: true, 
+          user: { id: userDoc.id, ...userDoc.data() } 
+        };
+      }
+      
+      return { success: false, message: 'Usuário não encontrado' };
     } catch (error) {
       return { success: false, error: error.message };
     }
