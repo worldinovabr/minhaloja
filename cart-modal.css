@@ -334,14 +334,14 @@
 }
 
 .btn-clear {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));
-  color: #dc2626;
-  border: 2px solid rgba(239, 68, 68, 0.3);
-  padding: 0.875rem 1.5rem;
-  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1)) !important;
+  color: #dc2626 !important;
+  border: 2px solid rgba(239, 68, 68, 0.3) !important;
+  padding: 0.875rem 1.5rem !important;
+  border-radius: 12px !important;
   cursor: pointer;
-  font-weight: 600;
-  font-size: 0.95rem;
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex: 1;
   max-width: 180px;
@@ -372,9 +372,9 @@
 }
 
 .btn-clear:hover {
-  background: linear-gradient(135deg, #dc2626, #b91c1c);
-  color: white;
-  border-color: #dc2626;
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  color: white !important;
+  border-color: #dc2626 !important;
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
 }
@@ -725,4 +725,28 @@
     border-radius: 8px;
     letter-spacing: 0.3px;
   }
+}
+
+/* Força aplicação dos estilos do botão limpar carrinho */
+.modal .cart-actions .btn-clear,
+button.btn-clear {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1)) !important;
+  color: #dc2626 !important;
+  border: 2px solid rgba(239, 68, 68, 0.3) !important;
+  padding: 0.875rem 1.5rem !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.modal .cart-actions .btn-clear:hover,
+button.btn-clear:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  color: white !important;
+  border-color: #dc2626 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3) !important;
 }
