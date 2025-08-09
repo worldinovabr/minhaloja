@@ -165,7 +165,7 @@ function searchProducts() {
     
     // Analytics fictício
     if (currentFilter.search) {
-      console.log('Busca realizada:', currentFilter.search);
+      AuthLogger.info('Busca realizada:', currentFilter.search);
     }
   }, 300);
 }
@@ -845,13 +845,19 @@ function closeLoginModal() {
 
 function handleLogin(event) {
   event.preventDefault();
+  
   const formData = new FormData(event.target);
   const email = formData.get('email');
   const password = formData.get('password');
 
-  // Validações básicas
+  // Validações básicas usando configurações
   if (!email || !password) {
-    showNotification('Por favor, preencha todos os campos', 'error');
+    showNotification(AUTH_CONFIG.MESSAGES.FILL_ALL_FIELDS, 'error');
+    return;
+  }
+
+  if (!AuthUtils.isValidEmail(email)) {
+    showNotification('Email inválido', 'error');
     return;
   }
 
@@ -861,77 +867,120 @@ function handleLogin(event) {
   submitButton.textContent = 'Entrando...';
   submitButton.disabled = true;
 
-  // Função assíncrona para lidar com Firebase
-  (async () => {
-    try {
-      // Importar Firebase Service
-      const { firebaseService } = await import('./firebase-config.js');
-      
-      // Tentar fazer login
-      const result = await firebaseService.signIn(email, password);
-      
+  // Firebase Login - Abordagem Simples
+  authenticateUser(email, password)
+    .then(result => {
       if (result.success) {
         // Login bem-sucedido
-        showNotification('Login realizado com sucesso!', 'success');
+        showNotification(AUTH_CONFIG.MESSAGES.LOGIN_SUCCESS, 'success');
         
-        // Salvar dados do usuário no localStorage
-        localStorage.setItem('currentUser', JSON.stringify({
-          uid: result.user.uid,
-          email: result.user.email,
-          userData: result.userData
-        }));
+        // Salvar dados do usuário
+        saveUserSession(result.user, result.userData);
         
-        // Fechar modal
+        // Fechar modal e atualizar interface
         closeLoginModal();
+        updateUserInterface(result.userData);
         
-        // Atualizar interface do usuário
-        if (typeof updateUserInterface === 'function') {
-          updateUserInterface(result.userData);
-        }
-        
-        console.log('✅ Login successful:', result.userData);
+        AuthLogger.success('Login realizado:', result.userData.nome);
         
       } else {
-        // Se o erro indica que o usuário não existe, redirecionar para registro
-        if (result.error === 'Usuário não encontrado' || 
-            result.error.includes('user-not-found') ||
-            result.error.includes('auth/user-not-found') ||
-            result.error.includes('invalid-credential')) {
+        // Verificar se usuário não existe para redirecionar para registro
+        if (AuthUtils.isUserNotFoundError(result.error)) {
+          showNotification(AUTH_CONFIG.MESSAGES.USER_NOT_FOUND, 'info');
           
-          showNotification('Usuário não encontrado. Redirecionando para cadastro...', 'info');
-          console.log('🔄 Redirecionando para cadastro - usuário não existe');
-          
-          // Aguardar um momento e depois abrir modal de registro
           setTimeout(() => {
             closeLoginModal();
             switchToRegister();
-            
-            // Pré-preencher o email no formulário de registro
-            setTimeout(() => {
-              const registerEmailInput = document.querySelector('#registerModal input[name="email"], #register-modal input[name="email"]');
-              if (registerEmailInput) {
-                registerEmailInput.value = email;
-                console.log('✅ Email pré-preenchido no formulário de registro');
-              }
-            }, 500);
-          }, 1500);
+            prefillRegistrationEmail(email);
+          }, AUTH_CONFIG.REDIRECT_DELAY);
           
         } else {
-          // Outros erros de autenticação
-          console.error('❌ Erro de autenticação:', result.error);
           showNotification(result.error, 'error');
         }
       }
-      
-    } catch (error) {
-      console.error('❌ Erro no login:', error);
-      showNotification('Erro interno. Tente novamente.', 'error');
-    } finally {
+    })
+    .catch(error => {
+      AuthLogger.error('Erro no login:', error);
+      showNotification(AUTH_CONFIG.MESSAGES.INTERNAL_ERROR, 'error');
+    })
+    .finally(() => {
       // Restaurar botão
       submitButton.textContent = originalText;
       submitButton.disabled = false;
+    });
+}
+
+// Função simplificada para autenticação
+async function authenticateUser(email, password) {
+  try {
+    // Importar Firebase Service
+    const { firebaseService } = await import('./firebase-config.js');
+    
+    // Tentar fazer login
+    const result = await firebaseService.signIn(email, password);
+    
+    if (result.success) {
+      // Buscar dados adicionais do usuário se necessário
+      const userData = result.userData || await getUserData(result.user.uid);
+      
+      return {
+        success: true,
+        user: result.user,
+        userData: userData
+      };
+    } else {
+      return {
+        success: false,
+        error: result.error
+      };
     }
-  })();
+    
+  } catch (error) {
+    return {
+      success: false,
+      error: AUTH_CONFIG.MESSAGES.CONNECTION_ERROR
+    };
+  }
+}
+
+// Função para salvar sessão do usuário
+function saveUserSession(user, userData) {
+  const sessionData = {
+    uid: user.uid,
+    email: user.email,
+    userData: userData,
+    loginTime: new Date().toISOString()
+  };
+  
+  localStorage.setItem('currentUser', JSON.stringify(sessionData));
+}
+
+// Função para pré-preencher email no registro
+function prefillRegistrationEmail(email) {
+  setTimeout(() => {
+    const registerEmailInputs = document.querySelectorAll(
+      '#registerModal input[name="email"], #register-modal input[name="email"]'
+    );
+    
+    registerEmailInputs.forEach(input => {
+      if (input) {
+        input.value = email;
+        AuthLogger.info('Email pré-preenchido no registro');
+      }
+    });
+  }, 500);
+}
+
+// Função auxiliar para buscar dados do usuário
+async function getUserData(uid) {
+  try {
+    const { firebaseService } = await import('./firebase-config.js');
+    const result = await firebaseService.getUserByUID(uid);
+    return result.success ? result.user : null;
+  } catch (error) {
+    console.warn('Erro ao buscar dados do usuário:', error);
+    return null;
+  }
 }
 
 function switchToRegister() {
@@ -1006,23 +1055,28 @@ function handleRegister(event) {
     adminCode: formData.get('adminCode')
   };
   
-  // Validações
+  // Validações usando configurações
   if (!data.name || !data.email || !data.password) {
-    showNotification('Por favor, preencha todos os campos obrigatórios', 'error');
+    showNotification(AUTH_CONFIG.MESSAGES.FILL_ALL_FIELDS, 'error');
+    return;
+  }
+  
+  if (!AuthUtils.isValidEmail(data.email)) {
+    showNotification('Email inválido', 'error');
+    return;
+  }
+  
+  if (!AuthUtils.isValidPassword(data.password)) {
+    showNotification(AUTH_CONFIG.MESSAGES.WEAK_PASSWORD, 'error');
     return;
   }
   
   if (data.password !== data.confirmPassword) {
-    showNotification('As senhas não coincidem', 'error');
+    showNotification(AUTH_CONFIG.MESSAGES.PASSWORDS_NO_MATCH, 'error');
     return;
   }
   
-  if (data.password.length < 6) {
-    showNotification('A senha deve ter pelo menos 6 caracteres', 'error');
-    return;
-  }
-  
-  if (registerType === 'admin' && data.adminCode !== 'ADMIN2024') {
+  if (registerType === 'admin' && data.adminCode !== AUTH_CONFIG.ADMIN_CODE) {
     showNotification('Código de administrador inválido', 'error');
     return;
   }
@@ -1033,75 +1087,100 @@ function handleRegister(event) {
   submitButton.textContent = 'Cadastrando...';
   submitButton.disabled = true;
   
-  // Função assíncrona para lidar com Firebase
-  (async () => {
-    try {
-      console.log('🔄 Iniciando processo de registro...', { email: data.email, tipo: registerType });
-      
-      // Importar Firebase Service
-      const { firebaseService } = await import('./firebase-config.js');
-      
-      // Preparar dados do usuário baseado no tipo
-      let userData = {
-        nome: data.name,
-        tipo: registerType === 'admin' ? 'admin' : 'cliente'
-      };
-      
-      if (registerType === 'cliente') {
-        userData = {
-          ...userData,
-          telefone: data.phone || '',
-          endereco: '',
-          cidade: '',
-          cep: ''
-        };
-      } else if (registerType === 'admin') {
-        userData = {
-          ...userData,
-          departamento: 'Administração',
-          funcionarioId: `ADM_${Date.now()}`,
-          permissoes: ['read', 'write', 'admin']
-        };
-      }
-      
-      console.log('📝 Dados do usuário preparados:', userData);
-      
-      // Tentar fazer registro
-      const result = await firebaseService.signUp(data.email, data.password, userData);
-      
+  // Firebase Register - Abordagem Simples
+  registerUser(data)
+    .then(result => {
       if (result.success) {
         // Registro bem-sucedido
-        console.log('✅ Registro realizado com sucesso:', result);
         closeRegisterModal();
-        showNotification(`Cadastro realizado com sucesso! Bem-vindo, ${data.name}!`, 'success');
+        showNotification(`${AUTH_CONFIG.MESSAGES.REGISTER_SUCCESS} Bem-vindo, ${data.name}!`, 'success');
         
-        // Salvar dados do usuário no localStorage
-        localStorage.setItem('currentUser', JSON.stringify({
-          uid: result.user.uid,
-          email: result.user.email,
-          userData: userData
-        }));
+        // Salvar sessão do usuário
+        saveUserSession(result.user, result.userData);
         
-        // Atualizar interface do usuário
-        if (typeof updateUserInterface === 'function') {
-          updateUserInterface(userData);
-        }
+        // Atualizar interface
+        updateUserInterface(result.userData);
+        
+        AuthLogger.success('Registro realizado:', result);
         
       } else {
-        // Erro no registro
-        console.error('❌ Erro no registro:', result.error);
         showNotification(result.error, 'error');
+        AuthLogger.error('Erro no registro:', result.error);
       }
-      
-    } catch (error) {
-      console.error('❌ Erro no registro:', error);
-      showNotification('Erro interno. Tente novamente.', 'error');
-    } finally {
+    })
+    .catch(error => {
+      AuthLogger.error('Erro no registro:', error);
+      showNotification(AUTH_CONFIG.MESSAGES.INTERNAL_ERROR, 'error');
+    })
+    .finally(() => {
       // Restaurar botão
       submitButton.textContent = originalText;
       submitButton.disabled = false;
+    });
+}
+
+// Função simplificada para registro
+async function registerUser(data) {
+  try {
+    AuthLogger.info('Iniciando processo de registro:', { email: data.email, tipo: registerType });
+    
+    // Importar Firebase Service
+    const { firebaseService } = await import('./firebase-config.js');
+    
+    // Preparar dados do usuário
+    const userData = prepareUserData(data);
+    
+    AuthLogger.info('Dados do usuário preparados:', userData);
+    
+    // Tentar fazer registro
+    const result = await firebaseService.signUp(data.email, data.password, userData);
+    
+    if (result.success) {
+      return {
+        success: true,
+        user: result.user,
+        userData: userData
+      };
+    } else {
+      return {
+        success: false,
+        error: result.error
+      };
     }
-  })();
+    
+  } catch (error) {
+    return {
+      success: false,
+      error: AUTH_CONFIG.MESSAGES.CONNECTION_ERROR
+    };
+  }
+}
+
+// Função para preparar dados do usuário baseado no tipo
+function prepareUserData(data) {
+  let userData = {
+    nome: data.name,
+    tipo: registerType === 'admin' ? 'admin' : 'cliente'
+  };
+  
+  if (registerType === 'cliente') {
+    userData = {
+      ...userData,
+      telefone: data.phone || '',
+      endereco: '',
+      cidade: '',
+      cep: ''
+    };
+  } else if (registerType === 'admin') {
+    userData = {
+      ...userData,
+      departamento: 'Administração',
+      funcionarioId: `ADM_${Date.now()}`,
+      permissoes: ['read', 'write', 'admin']
+    };
+  }
+  
+  return userData;
 }
 
 // Visualização de produto
@@ -1284,18 +1363,29 @@ function updateUserInterface(userData) {
 }
 
 function handleLogout() {
-  // Limpar localStorage
+  AuthLogger.info('Realizando logout...');
+  
+  // Limpar localStorage primeiro (mais rápido)
   localStorage.removeItem('currentUser');
   
-  // Importar Firebase e fazer logout
-  import('./firebase-config.js').then(({ firebaseService }) => {
-    firebaseService.logout();
-  });
+  // Logout do Firebase (em background)
+  logoutFromFirebase();
   
-  // Restaurar interface original
-  location.reload(); // Recarregar página para restaurar estado original
+  // Restaurar interface original imediatamente
+  location.reload();
   
   showNotification('Logout realizado com sucesso!', 'success');
+}
+
+// Função para logout do Firebase
+async function logoutFromFirebase() {
+  try {
+    const { firebaseService } = await import('./firebase-config.js');
+    await firebaseService.logout();
+    AuthLogger.success('Logout do Firebase realizado');
+  } catch (error) {
+    console.warn('⚠️ Erro no logout do Firebase:', error);
+  }
 }
 
 function showUserProfile() {
@@ -1308,44 +1398,61 @@ function showUserOrders() {
 
 // Verificar se usuário já está logado ao carregar a página
 document.addEventListener('DOMContentLoaded', function() {
-  // Debug Firebase
-  console.log('🚀 Iniciando sistema de autenticação...');
+  AuthLogger.info('Iniciando sistema de autenticação...');
   
-  // Verificar usuário no localStorage
+  // Verificar usuário no localStorage primeiro (mais rápido)
   const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-  if (currentUser && currentUser.userData) {
-    console.log('👤 Usuário encontrado no localStorage:', currentUser.userData.nome);
+  if (currentUser && currentUser.userData && AuthUtils.isSessionValid(currentUser)) {
+    AuthLogger.info('Usuário encontrado no localStorage:', currentUser.userData.nome);
     updateUserInterface(currentUser.userData);
   } else {
-    console.log('👤 Nenhum usuário logado encontrado');
+    if (currentUser && !AuthUtils.isSessionValid(currentUser)) {
+      AuthLogger.warn('Sessão expirada, limpando dados');
+      localStorage.removeItem('currentUser');
+    }
+    AuthLogger.info('Nenhum usuário logado encontrado');
   }
   
-  // Verificar estado do Firebase
-  setTimeout(async () => {
-    try {
-      const { checkAuth } = await import('./firebase-config.js');
-      const firebaseUser = await checkAuth();
-      
-      if (firebaseUser && !currentUser) {
-        console.log('🔄 Sincronizando estado de autenticação...');
-        // Usuário está logado no Firebase mas não no localStorage
-        const { firebaseService } = await import('./firebase-config.js');
-        const userData = await firebaseService.getUserByEmail(firebaseUser.email);
-        
-        if (userData.success) {
-          localStorage.setItem('currentUser', JSON.stringify({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            userData: userData.user
-          }));
-          updateUserInterface(userData.user);
-        }
-      }
-    } catch (error) {
-      console.error('⚠️ Erro ao verificar estado de autenticação:', error);
-    }
-  }, 1000);
+  // Verificar sincronização com Firebase (em background)
+  setTimeout(syncFirebaseAuth, AUTH_CONFIG.SYNC_DELAY);
 });
+
+// Função para sincronizar com Firebase
+async function syncFirebaseAuth() {
+  try {
+    const { checkAuth, firebaseService } = await import('./firebase-config.js');
+    const firebaseUser = await checkAuth();
+    const localUser = JSON.parse(localStorage.getItem('currentUser'));
+    
+    if (firebaseUser && !localUser) {
+      // Usuário logado no Firebase mas não no localStorage
+      AuthLogger.info('Sincronizando estado de autenticação...');
+      
+      const userData = await firebaseService.getUserByEmail(firebaseUser.email);
+      
+      if (userData.success) {
+        const sessionData = {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          userData: userData.user,
+          loginTime: new Date().toISOString()
+        };
+        
+        localStorage.setItem('currentUser', JSON.stringify(sessionData));
+        updateUserInterface(userData.user);
+        AuthLogger.success('Estado sincronizado com Firebase');
+      }
+    } else if (!firebaseUser && localUser) {
+      // Usuário no localStorage mas não no Firebase (sessão expirada)
+      AuthLogger.info('Limpando sessão expirada...');
+      localStorage.removeItem('currentUser');
+      location.reload();
+    }
+    
+  } catch (error) {
+    AuthLogger.warn('Erro ao sincronizar com Firebase:', error);
+  }
+}
 
 function toggleWishlist(id) {
   const index = wishlist.indexOf(id);
