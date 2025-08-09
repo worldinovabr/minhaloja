@@ -1,12 +1,12 @@
 // Firebase Configuration and Initialization
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { 
   getAuth, 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signOut, 
   onAuthStateChanged 
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { 
   getFirestore, 
   collection, 
@@ -19,14 +19,14 @@ import {
   where, 
   orderBy, 
   onSnapshot 
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { 
   getStorage, 
   ref, 
   uploadBytes, 
   getDownloadURL 
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -402,6 +402,7 @@ export class FirebaseService {
       
       return { success: false, message: 'Admin não encontrado' };
     } catch (error) {
+      console.error('Erro ao buscar admin por ID:', error);
       return { success: false, error: error.message };
     }
   }
@@ -891,9 +892,18 @@ export const initializeApp = async () => {
   try {
     console.log('🔥 Inicializando Firebase...');
     
-    // Verificar conexão
-    const testQuery = await getDocs(collection(db, 'users'));
-    console.log('✅ Conexão com Firebase estabelecida');
+    // Verificar conexão com autenticação
+    const authState = await checkAuth();
+    console.log('🔐 Estado de autenticação verificado:', authState ? 'Usuário logado' : 'Não logado');
+    
+    // Verificar conexão com Firestore
+    try {
+      const testQuery = await getDocs(collection(db, 'users'));
+      console.log('✅ Conexão com Firestore estabelecida');
+    } catch (firestoreError) {
+      console.warn('⚠️ Problema na conexão com Firestore:', firestoreError.message);
+      return { success: false, error: `Erro Firestore: ${firestoreError.message}` };
+    }
     
     // Inicializar estruturas
     await firebaseService.initializeDatabase();

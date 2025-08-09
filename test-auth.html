@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Autenticação - Minha Loja</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .console-output {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Teste de Autenticação Firebase - Minha Loja</h1>
+    
+    <div class="test-container">
+        <h2>🔍 Status do Firebase</h2>
+        <div id="firebase-status">Verificando conexão...</div>
+        <button onclick="testFirebaseConnection()">Testar Conexão</button>
+    </div>
+
+    <div class="test-container">
+        <h2>📝 Teste de Registro</h2>
+        <div class="test-form">
+            <input type="text" id="reg-name" placeholder="Nome completo" value="Usuário Teste">
+            <input type="email" id="reg-email" placeholder="Email" value="">
+            <input type="password" id="reg-password" placeholder="Senha" value="123456">
+            <input type="tel" id="reg-phone" placeholder="Telefone" value="(11) 99999-9999">
+            <button onclick="testRegister()">Testar Registro</button>
+        </div>
+        <div id="register-result" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>🔐 Teste de Login</h2>
+        <div class="test-form">
+            <input type="email" id="login-email" placeholder="Email" value="">
+            <input type="password" id="login-password" placeholder="Senha" value="123456">
+            <button onclick="testLogin()">Testar Login</button>
+        </div>
+        <div id="login-result" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>👤 Estado Atual</h2>
+        <button onclick="checkCurrentUser()">Verificar Usuário Atual</button>
+        <button onclick="testLogout()">Logout</button>
+        <div id="user-status" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>📋 Console Output</h2>
+        <div id="console-output" class="console-output">Aguardando logs...</div>
+        <button onclick="clearConsole()">Limpar Console</button>
+    </div>
+
+    <script type="module">
+        // Capturar logs do console
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addToConsole(message, type = 'log') {
+            const consoleOutput = document.getElementById('console-output');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#f00' : type === 'warn' ? '#ff0' : '#0f0';
+            consoleOutput.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsole(args.join(' '), 'log');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsole(args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToConsole(args.join(' '), 'warn');
+        };
+
+        // Funções de teste
+        window.testFirebaseConnection = async function() {
+            const statusDiv = document.getElementById('firebase-status');
+            statusDiv.innerHTML = 'Testando conexão...';
+            
+            try {
+                const { firebaseService, checkAuth } = await import('./firebase-config.js');
+                const authUser = await checkAuth();
+                
+                statusDiv.innerHTML = `
+                    ✅ Firebase conectado com sucesso!<br>
+                    🔐 Usuário autenticado: ${authUser ? authUser.email : 'Nenhum'}<br>
+                    📊 FirebaseService: ${firebaseService ? 'Disponível' : 'Não disponível'}
+                `;
+                statusDiv.className = 'result success';
+            } catch (error) {
+                statusDiv.innerHTML = `❌ Erro na conexão: ${error.message}`;
+                statusDiv.className = 'result error';
+            }
+        };
+
+        window.testRegister = async function() {
+            const resultDiv = document.getElementById('register-result');
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const phone = document.getElementById('reg-phone').value;
+            
+            if (!email) {
+                alert('Por favor, preencha o email');
+                return;
+            }
+            
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = 'Testando registro...';
+            resultDiv.className = 'result';
+            
+            try {
+                const { firebaseService } = await import('./firebase-config.js');
+                
+                const userData = {
+                    nome: name,
+                    tipo: 'cliente',
+                    telefone: phone
+                };
+                
+                const result = await firebaseService.signUp(email, password, userData);
+                
+                if (result.success) {
+                    resultDiv.innerHTML = `✅ Registro bem-sucedido!<br>UID: ${result.user.uid}`;
+                    resultDiv.className = 'result success';
+                    
+                    // Pré-preencher campos de login
+                    document.getElementById('login-email').value = email;
+                    document.getElementById('login-password').value = password;
+                } else {
+                    resultDiv.innerHTML = `❌ Erro no registro: ${result.error}`;
+                    resultDiv.className = 'result error';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `❌ Erro: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        };
+
+        window.testLogin = async function() {
+            const resultDiv = document.getElementById('login-result');
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (!email) {
+                alert('Por favor, preencha o email');
+                return;
+            }
+            
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = 'Testando login...';
+            resultDiv.className = 'result';
+            
+            try {
+                const { firebaseService } = await import('./firebase-config.js');
+                const result = await firebaseService.signIn(email, password);
+                
+                if (result.success) {
+                    resultDiv.innerHTML = `
+                        ✅ Login bem-sucedido!<br>
+                        👤 Email: ${result.user.email}<br>
+                        📝 Dados: ${result.userData ? result.userData.nome : 'Não encontrados'}
+                    `;
+                    resultDiv.className = 'result success';
+                } else {
+                    resultDiv.innerHTML = `❌ Erro no login: ${result.error}`;
+                    resultDiv.className = 'result error';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `❌ Erro: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        };
+
+        window.checkCurrentUser = async function() {
+            const statusDiv = document.getElementById('user-status');
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = 'Verificando usuário...';
+            statusDiv.className = 'result';
+            
+            try {
+                const { checkAuth } = await import('./firebase-config.js');
+                const user = await checkAuth();
+                const localUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+                
+                statusDiv.innerHTML = `
+                    🔐 Firebase Auth: ${user ? user.email : 'Não logado'}<br>
+                    💾 LocalStorage: ${localUser ? localUser.email : 'Não encontrado'}<br>
+                    📊 Sincronizado: ${user && localUser ? '✅' : '❌'}
+                `;
+                statusDiv.className = 'result success';
+            } catch (error) {
+                statusDiv.innerHTML = `❌ Erro: ${error.message}`;
+                statusDiv.className = 'result error';
+            }
+        };
+
+        window.testLogout = async function() {
+            try {
+                const { firebaseService } = await import('./firebase-config.js');
+                await firebaseService.logout();
+                localStorage.removeItem('currentUser');
+                
+                console.log('✅ Logout realizado com sucesso');
+                checkCurrentUser();
+            } catch (error) {
+                console.error('❌ Erro no logout:', error);
+            }
+        };
+
+        window.clearConsole = function() {
+            document.getElementById('console-output').innerHTML = 'Console limpo...';
+        };
+
+        // Gerar email aleatório para testes
+        document.getElementById('reg-email').value = `teste${Math.floor(Math.random() * 10000)}@exemplo.com`;
+        document.getElementById('login-email').value = document.getElementById('reg-email').value;
+
+        // Testar conexão automaticamente
+        setTimeout(() => {
+            testFirebaseConnection();
+        }, 1000);
+    </script>
+</body>
+</html>

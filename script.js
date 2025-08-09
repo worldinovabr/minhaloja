@@ -894,9 +894,12 @@ function handleLogin(event) {
       } else {
         // Se o erro indica que o usuário não existe, redirecionar para registro
         if (result.error === 'Usuário não encontrado' || 
-            result.error.includes('user-not-found')) {
+            result.error.includes('user-not-found') ||
+            result.error.includes('auth/user-not-found') ||
+            result.error.includes('invalid-credential')) {
           
           showNotification('Usuário não encontrado. Redirecionando para cadastro...', 'info');
+          console.log('🔄 Redirecionando para cadastro - usuário não existe');
           
           // Aguardar um momento e depois abrir modal de registro
           setTimeout(() => {
@@ -904,14 +907,18 @@ function handleLogin(event) {
             switchToRegister();
             
             // Pré-preencher o email no formulário de registro
-            const registerEmailInput = document.querySelector('#registerModal input[name="email"]');
-            if (registerEmailInput) {
-              registerEmailInput.value = email;
-            }
+            setTimeout(() => {
+              const registerEmailInput = document.querySelector('#registerModal input[name="email"], #register-modal input[name="email"]');
+              if (registerEmailInput) {
+                registerEmailInput.value = email;
+                console.log('✅ Email pré-preenchido no formulário de registro');
+              }
+            }, 500);
           }, 1500);
           
         } else {
           // Outros erros de autenticação
+          console.error('❌ Erro de autenticação:', result.error);
           showNotification(result.error, 'error');
         }
       }
@@ -1029,6 +1036,8 @@ function handleRegister(event) {
   // Função assíncrona para lidar com Firebase
   (async () => {
     try {
+      console.log('🔄 Iniciando processo de registro...', { email: data.email, tipo: registerType });
+      
       // Importar Firebase Service
       const { firebaseService } = await import('./firebase-config.js');
       
@@ -1055,11 +1064,14 @@ function handleRegister(event) {
         };
       }
       
+      console.log('📝 Dados do usuário preparados:', userData);
+      
       // Tentar fazer registro
       const result = await firebaseService.signUp(data.email, data.password, userData);
       
       if (result.success) {
         // Registro bem-sucedido
+        console.log('✅ Registro realizado com sucesso:', result);
         closeRegisterModal();
         showNotification(`Cadastro realizado com sucesso! Bem-vindo, ${data.name}!`, 'success');
         
@@ -1075,12 +1087,10 @@ function handleRegister(event) {
           updateUserInterface(userData);
         }
         
-        console.log('✅ Registro successful:', result);
-        
       } else {
         // Erro no registro
-        showNotification(result.error, 'error');
         console.error('❌ Erro no registro:', result.error);
+        showNotification(result.error, 'error');
       }
       
     } catch (error) {
@@ -1298,10 +1308,43 @@ function showUserOrders() {
 
 // Verificar se usuário já está logado ao carregar a página
 document.addEventListener('DOMContentLoaded', function() {
+  // Debug Firebase
+  console.log('🚀 Iniciando sistema de autenticação...');
+  
+  // Verificar usuário no localStorage
   const currentUser = JSON.parse(localStorage.getItem('currentUser'));
   if (currentUser && currentUser.userData) {
+    console.log('👤 Usuário encontrado no localStorage:', currentUser.userData.nome);
     updateUserInterface(currentUser.userData);
+  } else {
+    console.log('👤 Nenhum usuário logado encontrado');
   }
+  
+  // Verificar estado do Firebase
+  setTimeout(async () => {
+    try {
+      const { checkAuth } = await import('./firebase-config.js');
+      const firebaseUser = await checkAuth();
+      
+      if (firebaseUser && !currentUser) {
+        console.log('🔄 Sincronizando estado de autenticação...');
+        // Usuário está logado no Firebase mas não no localStorage
+        const { firebaseService } = await import('./firebase-config.js');
+        const userData = await firebaseService.getUserByEmail(firebaseUser.email);
+        
+        if (userData.success) {
+          localStorage.setItem('currentUser', JSON.stringify({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            userData: userData.user
+          }));
+          updateUserInterface(userData.user);
+        }
+      }
+    } catch (error) {
+      console.error('⚠️ Erro ao verificar estado de autenticação:', error);
+    }
+  }, 1000);
 });
 
 function toggleWishlist(id) {
