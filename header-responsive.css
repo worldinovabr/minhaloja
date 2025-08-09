@@ -1,17 +1,38 @@
 /* Responsividade para Header Melhorada */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .header-content {
-    padding: 1rem;
     gap: 1rem;
-    flex-direction: column;
   }
   
-  .header-content h1 {
-    font-size: 1.5rem;
+  .nav-bar {
+    gap: 0.5rem;
+  }
+  
+  .nav-link {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.9rem;
+  }
+  
+  .user-section {
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    flex-wrap: wrap;
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  .logo-section {
     order: 1;
     width: 100%;
     text-align: center;
-    margin-bottom: 0.5rem;
+  }
+  
+  .logo-section h1 {
+    font-size: 1.8rem;
   }
   
   .nav-bar {
@@ -22,21 +43,26 @@
     gap: 0.5rem;
   }
   
-  .nav-bar a {
+  .nav-link {
     padding: 0.4rem 0.8rem;
     font-size: 0.9rem;
   }
   
-  .user-info {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.8rem;
+  .user-section {
     order: 3;
+    width: 100%;
+    justify-content: center;
+    gap: 1rem;
+  }
+  
+  .cart-info, .user-info {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
   }
   
   .btn-login {
     padding: 0.5rem 1rem !important;
     font-size: 0.9rem !important;
-    order: 4;
   }
 
   /* Banner responsivo */
@@ -70,17 +96,36 @@
     padding: 0.5rem;
   }
   
-  .header-content h1 {
-    font-size: 1.3rem;
+  .logo-section h1 {
+    font-size: 1.5rem;
   }
   
   .nav-bar {
     gap: 0.3rem;
   }
   
-  .nav-bar a {
+  .nav-link {
     padding: 0.3rem 0.6rem;
     font-size: 0.8rem;
+  }
+  
+  .nav-link i {
+    display: none; /* Ocultar ícones em telas muito pequenas */
+  }
+  
+  .user-section {
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .cart-info, .user-info {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.7rem;
+  }
+  
+  .btn-login {
+    padding: 0.4rem 0.8rem !important;
+    font-size: 0.8rem !important;
   }
 
   /* Banner mobile */

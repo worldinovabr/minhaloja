@@ -31,11 +31,14 @@ header {
   max-width: 1200px;
   margin: 0 auto;
   padding: 1rem 2rem;
-  flex-wrap: nowrap;
   gap: 2rem;
 }
 
-.header-content h1 {
+.logo-section {
+  flex-shrink: 0;
+}
+
+.logo-section h1 {
   color: #fff;
   font-size: 2rem;
   font-weight: 700;
@@ -44,42 +47,89 @@ header {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.logo-section h1:hover {
+  transform: scale(1.05);
 }
 
 .nav-bar {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  flex-wrap: nowrap;
+  gap: 1rem;
   flex: 1;
-  justify-content: flex-end;
+  justify-content: center;
 }
 
-.nav-bar a {
+.nav-link {
   color: #fff;
   text-decoration: none;
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.2rem;
   border-radius: 25px;
   transition: all 0.3s ease;
   font-weight: 500;
   white-space: nowrap;
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.nav-bar a:hover {
+.nav-link:hover {
   background: rgba(255, 255, 255, 0.1);
   transform: translateY(-2px);
 }
 
-.nav-bar a.active {
+.nav-link.active {
   background: linear-gradient(135deg, #3498db, #2980b9);
   box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
 }
 
+.nav-link i {
+  font-size: 0.9rem;
+}
+
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.cart-info {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.6rem 1rem;
+  border-radius: 20px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cart-info:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.cart-count {
+  background: #e74c3c;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 0.2rem 0.5rem;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+
 .user-info {
   background: rgba(255, 255, 255, 0.1);
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1rem;
   border-radius: 20px;
   color: #fff;
   font-size: 0.9rem;
@@ -92,12 +142,16 @@ header {
 .btn-login {
   background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
   color: #fff !important;
-  padding: 0.6rem 1.5rem !important;
+  padding: 0.6rem 1.2rem !important;
   border-radius: 25px !important;
   font-weight: 600 !important;
   text-decoration: none !important;
   transition: all 0.3s ease !important;
   box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  white-space: nowrap !important;
 }
 
 .btn-login:hover {
