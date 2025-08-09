@@ -1392,100 +1392,104 @@
       }
       
       const cart = productManager.getCart();
+      const modal = document.getElementById('cart-modal');
+      const cartItemsContainer = document.getElementById('cart-items-modal');
+      const cartTotalElement = document.getElementById('cart-total-modal');
       
-      const modal = document.createElement('div');
-      modal.className = 'modal cart-modal';
-      modal.innerHTML = `
-        <div class="modal-content large">
-          <div class="modal-header">
-            <h2><i class="fas fa-shopping-cart"></i> Seu Carrinho</h2>
-            <span class="close">&times;</span>
+      // Limpar conteúdo anterior
+      cartItemsContainer.innerHTML = '';
+      
+      if (cart.length === 0) {
+        cartItemsContainer.innerHTML = `
+          <div class="empty-cart">
+            <i class="fas fa-shopping-cart"></i>
+            <h3>Seu carrinho está vazio</h3>
+            <p>Adicione alguns produtos incríveis!</p>
+            <button onclick="closeCartModal(); showSection('produtos')" class="btn-primary">
+              <i class="fas fa-shopping-bag"></i> Ver Produtos
+            </button>
           </div>
-          <div class="cart-content">
-            ${cart.length === 0 ? 
-              '<div class="empty-cart"><i class="fas fa-shopping-cart"></i><p>Seu carrinho está vazio</p></div>' :
-              cart.map(item => `
-                <div class="cart-item-modal" data-id="${item.id}">
-                  <img src="${item.imagem || 'https://via.placeholder.com/60x60?text=Produto'}" alt="${item.nome}">
-                  <div class="item-info">
-                    <h4>${item.nome}</h4>
-                    <p class="item-price">R$ ${item.preco.toFixed(2)} cada</p>
-                  </div>
-                  <div class="quantity-controls">
-                    <button class="qty-btn minus" onclick="updateCartQuantity('${item.id}', ${item.quantity - 1})">
-                      <i class="fas fa-minus"></i>
-                    </button>
-                    <span class="quantity">${item.quantity}</span>
-                    <button class="qty-btn plus" onclick="updateCartQuantity('${item.id}', ${item.quantity + 1})">
-                      <i class="fas fa-plus"></i>
-                    </button>
-                  </div>
-                  <div class="item-total">R$ ${(item.preco * item.quantity).toFixed(2)}</div>
-                  <button class="btn-remove" onclick="removeFromCart('${item.id}')" title="Remover item">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </div>
-              `).join('')
-            }
-          </div>
-          ${cart.length > 0 ? `
-            <div class="cart-footer">
-              <div class="cart-summary">
-                <div class="cart-total">
-                  <strong>Total: R$ ${cart.reduce((sum, item) => sum + (item.preco * item.quantity), 0).toFixed(2)}</strong>
-                </div>
-                <div class="cart-items-count">${cart.reduce((sum, item) => sum + item.quantity, 0)} item(s)</div>
-              </div>
-              <div class="cart-actions">
-                <button class="btn-secondary" onclick="clearCart()">
-                  <i class="fas fa-trash"></i> Limpar Carrinho
-                </button>
-                <button class="btn-primary" onclick="proceedToCheckout()">
-                  <i class="fas fa-credit-card"></i> Finalizar Compra
-                </button>
-              </div>
+        `;
+        cartTotalElement.textContent = '0.00';
+      } else {
+        // Renderizar itens do carrinho
+        cart.forEach(item => {
+          const cartItem = document.createElement('div');
+          cartItem.className = 'cart-item-modal';
+          cartItem.innerHTML = `
+            <img src="${item.imagem || 'https://via.placeholder.com/60x60?text=Produto'}" alt="${item.nome}">
+            <div class="item-info">
+              <h4>${item.nome}</h4>
+              <p class="item-price">R$ ${item.preco.toFixed(2)} cada</p>
             </div>
-          ` : `
-            <div class="cart-footer">
-              <button class="btn-primary" onclick="showSection('produtos'); closeCartModal()">
-                <i class="fas fa-shopping-bag"></i> Ver Produtos
+            <div class="quantity-controls">
+              <button class="qty-btn minus" onclick="updateCartQuantity('${item.id}', ${item.quantity - 1})">
+                <i class="fas fa-minus"></i>
+              </button>
+              <span class="quantity">${item.quantity}</span>
+              <button class="qty-btn plus" onclick="updateCartQuantity('${item.id}', ${item.quantity + 1})">
+                <i class="fas fa-plus"></i>
               </button>
             </div>
-          `}
-        </div>
-      `;
+            <div class="item-total">
+              <span>R$ ${(item.preco * item.quantity).toFixed(2)}</span>
+            </div>
+            <button class="remove-item" onclick="removeFromCart('${item.id}')" title="Remover item">
+              <i class="fas fa-trash"></i>
+            </button>
+          `;
+          cartItemsContainer.appendChild(cartItem);
+        });
+        
+        // Calcular total
+        const total = cart.reduce((sum, item) => sum + (item.preco * item.quantity), 0);
+        cartTotalElement.textContent = total.toFixed(2);
+      }
       
-      document.body.appendChild(modal);
+      // Mostrar modal
       modal.style.display = 'block';
-      
-      // Adicionar animação de entrada
       setTimeout(() => {
         modal.classList.add('show');
       }, 10);
-      
-      // Fechar modal
-      modal.querySelector('.close').addEventListener('click', () => {
-        closeCartModal();
-      });
-      
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          closeCartModal();
-        }
-      });
-      
-      // Função para fechar modal
-      window.closeCartModal = function() {
-        modal.classList.remove('show');
-        setTimeout(() => {
-          if (modal.parentNode) {
-            document.body.removeChild(modal);
-          }
-        }, 300);
-      };
     }
-    
+
+    // Função para fechar o modal do carrinho
+    function closeCartModal() {
+      const modal = document.getElementById('cart-modal');
+      modal.classList.remove('show');
+      setTimeout(() => {
+        modal.style.display = 'none';
+      }, 300);
+    }
+
     // Funções globais para o carrinho
+    window.updateCartQuantity = function(productId, newQuantity) {
+      if (newQuantity <= 0) {
+        removeFromCart(productId);
+        return;
+      }
+      
+      const cartItem = productManager.cart.find(item => item.id === productId);
+      if (cartItem) {
+        cartItem.quantity = newQuantity;
+        productManager.saveCart();
+        productManager.updateCartUI();
+        
+        // Atualizar modal
+        showCartModal();
+      }
+    };
+
+    window.removeFromCart = function(productId) {
+      productManager.cart = productManager.cart.filter(item => item.id !== productId);
+      productManager.saveCart();
+      productManager.updateCartUI();
+      
+      // Atualizar modal
+      showCartModal();
+    };
+
+    window.closeCartModal = closeCartModal;
     window.updateCartQuantity = function(productId, newQuantity) {
       if (newQuantity <= 0) {
         removeFromCart(productId);
