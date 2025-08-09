@@ -1838,3 +1838,476 @@ a:focus {
     margin: 1rem 0 !important;
   }
 }
+
+/* Estilos para Modal de Opções de Registro */
+#register-options-modal .modal-content {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9)) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(139, 69, 19, 0.1) !important;
+  border-radius: 24px !important;
+  padding: 2.5rem !important;
+  box-shadow: 
+    0 25px 60px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+  max-width: 600px !important;
+  width: 90% !important;
+  margin: 8% auto !important;
+  min-height: auto !important;
+}
+
+#register-options-modal h2 {
+  color: #2d3748 !important;
+  font-size: 1.75rem !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  margin-bottom: 2.5rem !important;
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+.register-options {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+  gap: 1.5rem !important;
+  margin-top: 2rem !important;
+}
+
+.register-option-btn {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.8), rgba(248, 250, 252, 0.6)) !important;
+  border: 2px solid rgba(102, 126, 234, 0.2) !important;
+  border-radius: 20px !important;
+  padding: 2rem 1.5rem !important;
+  cursor: pointer !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  text-align: center !important;
+  position: relative !important;
+  overflow: hidden !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.register-option-btn::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent) !important;
+  transition: left 0.6s ease !important;
+}
+
+.register-option-btn:hover::before {
+  left: 100% !important;
+}
+
+.register-option-btn:hover {
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  border-color: #667eea !important;
+  transform: translateY(-5px) scale(1.02) !important;
+  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3) !important;
+}
+
+.register-option-btn:hover i {
+  color: white !important;
+  transform: scale(1.2) !important;
+}
+
+.register-option-btn:hover h3,
+.register-option-btn:hover p {
+  color: white !important;
+}
+
+.register-option-btn i {
+  font-size: 3rem !important;
+  color: #667eea !important;
+  margin-bottom: 1rem !important;
+  transition: all 0.3s ease !important;
+}
+
+.register-option-btn h3 {
+  color: #2d3748 !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  margin: 1rem 0 0.5rem 0 !important;
+  transition: all 0.3s ease !important;
+}
+
+.register-option-btn p {
+  color: #4a5568 !important;
+  font-size: 0.95rem !important;
+  margin: 0 !important;
+  transition: all 0.3s ease !important;
+  line-height: 1.4 !important;
+}
+
+#register-options-modal .close {
+  position: absolute !important;
+  top: 1rem !important;
+  right: 1rem !important;
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #dc2626 !important;
+  border: none !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  font-size: 1.2rem !important;
+  font-weight: bold !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.3s ease !important;
+  z-index: 10 !important;
+}
+
+#register-options-modal .close:hover {
+  background: #dc2626 !important;
+  color: white !important;
+  transform: rotate(90deg) scale(1.1) !important;
+}
+
+/* Estilos para Modal de Registro (Formulário) */
+#register-modal .modal-content {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9)) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(139, 69, 19, 0.1) !important;
+  border-radius: 24px !important;
+  padding: 2.5rem !important;
+  box-shadow: 
+    0 25px 60px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+  max-width: 500px !important;
+  width: 90% !important;
+  margin: 5% auto !important;
+  min-height: auto !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+}
+
+#register-modal h2 {
+  color: #2d3748 !important;
+  font-size: 1.75rem !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  margin-bottom: 2rem !important;
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+#register-modal input {
+  width: 100% !important;
+  padding: 1rem 1.25rem !important;
+  border: 2px solid rgba(139, 69, 19, 0.1) !important;
+  border-radius: 12px !important;
+  font-size: 1rem !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(10px) !important;
+  margin-bottom: 1.25rem !important;
+  transition: all 0.3s ease !important;
+  box-sizing: border-box !important;
+}
+
+#register-modal input:focus {
+  outline: none !important;
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+#register-modal .btn-primary {
+  width: 100% !important;
+  padding: 1rem !important;
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 12px !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  margin-top: 1rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+#register-modal .btn-primary:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3) !important;
+}
+
+#register-modal .btn-primary:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2) !important;
+}
+
+#register-modal .close {
+  position: absolute !important;
+  top: 1rem !important;
+  right: 1rem !important;
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #dc2626 !important;
+  border: none !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  font-size: 1.2rem !important;
+  font-weight: bold !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.3s ease !important;
+  z-index: 10 !important;
+}
+
+#register-modal .close:hover {
+  background: #dc2626 !important;
+  color: white !important;
+  transform: rotate(90deg) scale(1.1) !important;
+}
+
+#admin-fields {
+  background: linear-gradient(145deg, rgba(255, 193, 7, 0.1), rgba(255, 235, 59, 0.05)) !important;
+  border: 2px solid rgba(255, 193, 7, 0.2) !important;
+  border-radius: 12px !important;
+  padding: 1rem !important;
+  margin: 1rem 0 !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+#admin-fields input {
+  margin-bottom: 0 !important;
+  border-color: rgba(255, 193, 7, 0.3) !important;
+}
+
+#admin-fields input:focus {
+  border-color: #ffc107 !important;
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.1) !important;
+}
+
+/* Responsividade para todos os modais de autenticação */
+@media (max-width: 768px) {
+  #register-options-modal .modal-content,
+  #register-modal .modal-content {
+    width: 95% !important;
+    margin: 5% auto !important;
+    padding: 2rem !important;
+    border-radius: 20px !important;
+  }
+  
+  #register-options-modal h2,
+  #register-modal h2 {
+    font-size: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+  
+  .register-options {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  
+  .register-option-btn {
+    padding: 1.5rem 1rem !important;
+  }
+  
+  .register-option-btn i {
+    font-size: 2.5rem !important;
+  }
+  
+  .register-option-btn h3 {
+    font-size: 1.1rem !important;
+  }
+  
+  #register-modal input {
+    padding: 0.875rem 1rem !important;
+    font-size: 0.95rem !important;
+  }
+  
+  #register-modal .btn-primary {
+    padding: 0.875rem !important;
+    font-size: 0.95rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  #register-options-modal .modal-content,
+  #register-modal .modal-content {
+    width: 98% !important;
+    margin: 3% auto !important;
+    padding: 1.5rem !important;
+    border-radius: 16px !important;
+  }
+  
+  #register-options-modal h2,
+  #register-modal h2 {
+    font-size: 1.3rem !important;
+  }
+  
+  .register-option-btn {
+    padding: 1.25rem 0.75rem !important;
+  }
+  
+  .register-option-btn i {
+    font-size: 2rem !important;
+  }
+  
+  #register-modal .modal-content {
+    max-height: 95vh !important;
+  }
+}
+
+/* Estilos para Modal de Esqueci Minha Senha */
+#forgot-password-modal .modal-content {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9)) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(139, 69, 19, 0.1) !important;
+  border-radius: 24px !important;
+  padding: 2.5rem !important;
+  box-shadow: 
+    0 25px 60px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+  max-width: 450px !important;
+  width: 90% !important;
+  margin: 10% auto !important;
+  min-height: auto !important;
+}
+
+#forgot-password-modal h2 {
+  color: #2d3748 !important;
+  font-size: 1.75rem !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  margin-bottom: 1rem !important;
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+#forgot-password-modal h2 i {
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  margin-right: 0.5rem !important;
+}
+
+.forgot-description {
+  text-align: center !important;
+  color: #4a5568 !important;
+  font-size: 1rem !important;
+  line-height: 1.5 !important;
+  margin-bottom: 2rem !important;
+  padding: 1rem !important;
+  background: rgba(220, 38, 38, 0.05) !important;
+  border-radius: 12px !important;
+  border-left: 4px solid #dc2626 !important;
+}
+
+#forgot-password-modal input {
+  width: 100% !important;
+  padding: 1rem 1.25rem !important;
+  border: 2px solid rgba(220, 38, 38, 0.2) !important;
+  border-radius: 12px !important;
+  font-size: 1rem !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(10px) !important;
+  margin-bottom: 1.5rem !important;
+  transition: all 0.3s ease !important;
+  box-sizing: border-box !important;
+}
+
+#forgot-password-modal input:focus {
+  outline: none !important;
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+#forgot-password-modal .btn-primary {
+  width: 100% !important;
+  padding: 1rem !important;
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 12px !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  margin-bottom: 1.5rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+#forgot-password-modal .btn-primary:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(220, 38, 38, 0.3) !important;
+}
+
+#forgot-password-modal .btn-primary:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.2) !important;
+}
+
+.back-to-login {
+  text-align: center !important;
+}
+
+#forgot-password-modal .btn-link {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)) !important;
+  color: #667eea !important;
+  border: 2px solid rgba(102, 126, 234, 0.2) !important;
+  padding: 0.875rem 1.5rem !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  transition: all 0.3s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  font-size: 0.9rem !important;
+  cursor: pointer !important;
+  min-width: 200px !important;
+}
+
+#forgot-password-modal .btn-link:hover {
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  color: white !important;
+  border-color: #667eea !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.25) !important;
+}
+
+#forgot-password-modal .close {
+  position: absolute !important;
+  top: 1rem !important;
+  right: 1rem !important;
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #dc2626 !important;
+  border: none !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  font-size: 1.2rem !important;
+  font-weight: bold !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.3s ease !important;
+  z-index: 10 !important;
+}
+
+#forgot-password-modal .close:hover {
+  background: #dc2626 !important;
+  color: white !important;
+  transform: rotate(90deg) scale(1.1) !important;
+}

@@ -868,11 +868,31 @@ function switchToRegister() {
 }
 
 function showForgotPassword() {
-  const email = prompt('Digite seu e-mail para recuperação de senha:');
-  if (email) {
-    alert('Um link de recuperação foi enviado para seu e-mail!');
-    // Aqui você implementaria a recuperação de senha
-  }
+  document.getElementById('login-modal').style.display = 'none';
+  document.getElementById('forgot-password-modal').style.display = 'block';
+}
+
+function closeForgotPasswordModal() {
+  document.getElementById('forgot-password-modal').style.display = 'none';
+}
+
+function backToLogin() {
+  document.getElementById('forgot-password-modal').style.display = 'none';
+  document.getElementById('login-modal').style.display = 'block';
+}
+
+function handleForgotPassword(event) {
+  event.preventDefault();
+  const email = event.target.email.value;
+  
+  // Simular envio de email
+  alert('Um link de recuperação foi enviado para: ' + email);
+  
+  // Fechar modal e voltar para login
+  closeForgotPasswordModal();
+  
+  // Aqui você implementaria a lógica real de recuperação de senha
+  // firebase.auth().sendPasswordResetEmail(email)
 }
 
 // Sistema de cadastro
