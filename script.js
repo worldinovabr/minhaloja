@@ -1104,8 +1104,14 @@ function handleRegister(event) {
         AuthLogger.success('Registro realizado:', result);
         
       } else {
-        showNotification(result.error, 'error');
-        AuthLogger.error('Erro no registro:', result.error);
+        // Verificar erro específico
+        AuthLogger.error('Erro específico no registro:', result.error);
+        
+        if (result.error.includes('já está em uso') || result.error.includes('already-in-use')) {
+          showNotification('Este email já está cadastrado. Tente fazer login.', 'info');
+        } else {
+          showNotification(result.error, 'error');
+        }
       }
     })
     .catch(error => {
@@ -1133,8 +1139,31 @@ async function registerUser(data) {
       };
     }
     
-    // Importar Firebase Service
-    const { firebaseService } = await import('./firebase-config.js');
+    // Verificar se AUTH_CONFIG está disponível
+    if (typeof AUTH_CONFIG === 'undefined') {
+      AuthLogger.error('AUTH_CONFIG não está disponível');
+      return {
+        success: false,
+        error: 'Erro de configuração do sistema'
+      };
+    }
+    
+    // Importar Firebase Service com tratamento de erro
+    let firebaseService;
+    try {
+      const firebaseModule = await import('./firebase-config.js');
+      firebaseService = firebaseModule.firebaseService;
+      
+      if (!firebaseService) {
+        throw new Error('firebaseService não foi importado corretamente');
+      }
+    } catch (importError) {
+      AuthLogger.error('Erro ao importar Firebase:', importError);
+      return {
+        success: false,
+        error: 'Erro ao conectar com o sistema de autenticação'
+      };
+    }
     
     // Preparar dados do usuário
     const userData = prepareUserData(data);
@@ -1162,7 +1191,7 @@ async function registerUser(data) {
     AuthLogger.error('Erro na função registerUser:', error);
     return {
       success: false,
-      error: AUTH_CONFIG.MESSAGES.CONNECTION_ERROR
+      error: 'Erro interno do sistema. Tente novamente.'
     };
   }
 }
