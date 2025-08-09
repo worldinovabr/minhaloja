@@ -849,17 +849,82 @@ function handleLogin(event) {
   const email = formData.get('email');
   const password = formData.get('password');
 
-  // Aqui você implementaria a autenticação real
-  console.log('Tentativa de login:', { email, password });
-  
-  // Simulação de login bem-sucedido (substitua pela lógica real)
-  if (email && password) {
-    alert('Login realizado com sucesso!');
-    closeLoginModal();
-    // Aqui você atualizaria a interface para mostrar o usuário logado
-  } else {
-    alert('E-mail ou senha inválidos!');
+  // Validações básicas
+  if (!email || !password) {
+    showNotification('Por favor, preencha todos os campos', 'error');
+    return;
   }
+
+  // Mostrar indicador de carregamento
+  const submitButton = event.target.querySelector('button[type="submit"]');
+  const originalText = submitButton.textContent;
+  submitButton.textContent = 'Entrando...';
+  submitButton.disabled = true;
+
+  // Função assíncrona para lidar com Firebase
+  (async () => {
+    try {
+      // Importar Firebase Service
+      const { firebaseService } = await import('./firebase-config.js');
+      
+      // Tentar fazer login
+      const result = await firebaseService.signIn(email, password);
+      
+      if (result.success) {
+        // Login bem-sucedido
+        showNotification('Login realizado com sucesso!', 'success');
+        
+        // Salvar dados do usuário no localStorage
+        localStorage.setItem('currentUser', JSON.stringify({
+          uid: result.user.uid,
+          email: result.user.email,
+          userData: result.userData
+        }));
+        
+        // Fechar modal
+        closeLoginModal();
+        
+        // Atualizar interface do usuário
+        if (typeof updateUserInterface === 'function') {
+          updateUserInterface(result.userData);
+        }
+        
+        console.log('✅ Login successful:', result.userData);
+        
+      } else {
+        // Se o erro indica que o usuário não existe, redirecionar para registro
+        if (result.error === 'Usuário não encontrado' || 
+            result.error.includes('user-not-found')) {
+          
+          showNotification('Usuário não encontrado. Redirecionando para cadastro...', 'info');
+          
+          // Aguardar um momento e depois abrir modal de registro
+          setTimeout(() => {
+            closeLoginModal();
+            switchToRegister();
+            
+            // Pré-preencher o email no formulário de registro
+            const registerEmailInput = document.querySelector('#registerModal input[name="email"]');
+            if (registerEmailInput) {
+              registerEmailInput.value = email;
+            }
+          }, 1500);
+          
+        } else {
+          // Outros erros de autenticação
+          showNotification(result.error, 'error');
+        }
+      }
+      
+    } catch (error) {
+      console.error('❌ Erro no login:', error);
+      showNotification('Erro interno. Tente novamente.', 'error');
+    } finally {
+      // Restaurar botão
+      submitButton.textContent = originalText;
+      submitButton.disabled = false;
+    }
+  })();
 }
 
 function switchToRegister() {
@@ -935,6 +1000,11 @@ function handleRegister(event) {
   };
   
   // Validações
+  if (!data.name || !data.email || !data.password) {
+    showNotification('Por favor, preencha todos os campos obrigatórios', 'error');
+    return;
+  }
+  
   if (data.password !== data.confirmPassword) {
     showNotification('As senhas não coincidem', 'error');
     return;
@@ -950,17 +1020,78 @@ function handleRegister(event) {
     return;
   }
   
-  // Simular cadastro
-  showNotification('Cadastrando usuário...', 'info');
-  setTimeout(() => {
-    closeRegisterModal();
-    showNotification(`Cadastro realizado com sucesso! Bem-vindo, ${data.name}!`, 'success');
-    document.getElementById('user-name').textContent = data.name;
-    
-    // Esconder botões de auth e mostrar nome do usuário
-    document.querySelector('.auth-buttons').style.display = 'none';
-    document.querySelector('.user-info').style.display = 'flex';
-  }, 1500);
+  // Mostrar indicador de carregamento
+  const submitButton = event.target.querySelector('button[type="submit"]');
+  const originalText = submitButton.textContent;
+  submitButton.textContent = 'Cadastrando...';
+  submitButton.disabled = true;
+  
+  // Função assíncrona para lidar com Firebase
+  (async () => {
+    try {
+      // Importar Firebase Service
+      const { firebaseService } = await import('./firebase-config.js');
+      
+      // Preparar dados do usuário baseado no tipo
+      let userData = {
+        nome: data.name,
+        tipo: registerType === 'admin' ? 'admin' : 'cliente'
+      };
+      
+      if (registerType === 'cliente') {
+        userData = {
+          ...userData,
+          telefone: data.phone || '',
+          endereco: '',
+          cidade: '',
+          cep: ''
+        };
+      } else if (registerType === 'admin') {
+        userData = {
+          ...userData,
+          departamento: 'Administração',
+          funcionarioId: `ADM_${Date.now()}`,
+          permissoes: ['read', 'write', 'admin']
+        };
+      }
+      
+      // Tentar fazer registro
+      const result = await firebaseService.signUp(data.email, data.password, userData);
+      
+      if (result.success) {
+        // Registro bem-sucedido
+        closeRegisterModal();
+        showNotification(`Cadastro realizado com sucesso! Bem-vindo, ${data.name}!`, 'success');
+        
+        // Salvar dados do usuário no localStorage
+        localStorage.setItem('currentUser', JSON.stringify({
+          uid: result.user.uid,
+          email: result.user.email,
+          userData: userData
+        }));
+        
+        // Atualizar interface do usuário
+        if (typeof updateUserInterface === 'function') {
+          updateUserInterface(userData);
+        }
+        
+        console.log('✅ Registro successful:', result);
+        
+      } else {
+        // Erro no registro
+        showNotification(result.error, 'error');
+        console.error('❌ Erro no registro:', result.error);
+      }
+      
+    } catch (error) {
+      console.error('❌ Erro no registro:', error);
+      showNotification('Erro interno. Tente novamente.', 'error');
+    } finally {
+      // Restaurar botão
+      submitButton.textContent = originalText;
+      submitButton.disabled = false;
+    }
+  })();
 }
 
 // Visualização de produto
@@ -1102,6 +1233,76 @@ function getNotificationIcon(type) {
 
 // Lista de desejos (básica)
 let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+
+function updateUserInterface(userData) {
+  // Atualizar botões de login/logout na navbar
+  const loginBtn = document.querySelector('.auth-buttons .btn-primary');
+  const signupBtn = document.querySelector('.auth-buttons .btn-secondary');
+  
+  if (loginBtn && signupBtn && userData) {
+    // Esconder botões de login/cadastro
+    loginBtn.style.display = 'none';
+    signupBtn.style.display = 'none';
+    
+    // Criar botão de usuário logado
+    const userMenu = document.createElement('div');
+    userMenu.className = 'user-menu';
+    userMenu.innerHTML = `
+      <button class="btn btn-outline user-btn">
+        <i class="fas fa-user"></i>
+        <span>Olá, ${userData.nome || userData.email}</span>
+      </button>
+      <div class="user-dropdown">
+        <a href="#" onclick="showUserProfile()">
+          <i class="fas fa-user-circle"></i> Meu Perfil
+        </a>
+        <a href="#" onclick="showUserOrders()">
+          <i class="fas fa-shopping-bag"></i> Meus Pedidos
+        </a>
+        <a href="#" onclick="handleLogout()">
+          <i class="fas fa-sign-out-alt"></i> Sair
+        </a>
+      </div>
+    `;
+    
+    // Inserir menu do usuário
+    const authButtons = document.querySelector('.auth-buttons');
+    if (authButtons) {
+      authButtons.appendChild(userMenu);
+    }
+  }
+}
+
+function handleLogout() {
+  // Limpar localStorage
+  localStorage.removeItem('currentUser');
+  
+  // Importar Firebase e fazer logout
+  import('./firebase-config.js').then(({ firebaseService }) => {
+    firebaseService.logout();
+  });
+  
+  // Restaurar interface original
+  location.reload(); // Recarregar página para restaurar estado original
+  
+  showNotification('Logout realizado com sucesso!', 'success');
+}
+
+function showUserProfile() {
+  showNotification('Funcionalidade em desenvolvimento', 'info');
+}
+
+function showUserOrders() {
+  showNotification('Funcionalidade em desenvolvimento', 'info');
+}
+
+// Verificar se usuário já está logado ao carregar a página
+document.addEventListener('DOMContentLoaded', function() {
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (currentUser && currentUser.userData) {
+    updateUserInterface(currentUser.userData);
+  }
+});
 
 function toggleWishlist(id) {
   const index = wishlist.indexOf(id);

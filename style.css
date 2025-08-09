@@ -2956,3 +2956,117 @@ a:focus {
     border-radius: 12px !important;
   }
 }
+
+/* ===== USER MENU STYLES ===== */
+.user-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.user-btn {
+  background: var(--primary-gradient) !important;
+  border: none !important;
+  color: white !important;
+  padding: 0.75rem 1.25rem !important;
+  border-radius: 25px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3) !important;
+  cursor: pointer;
+}
+
+.user-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4) !important;
+}
+
+.user-btn i {
+  margin-right: 0.5rem;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-width: 200px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  margin-top: 0.5rem;
+}
+
+.user-menu:hover .user-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.user-dropdown a {
+  display: flex;
+  align-items: center;
+  padding: 0.875rem 1.25rem;
+  text-decoration: none;
+  color: var(--text-dark);
+  transition: all 0.3s ease;
+  border-radius: 10px;
+  margin: 0.25rem;
+}
+
+.user-dropdown a:hover {
+  background: var(--primary-gradient);
+  color: white;
+  transform: translateX(5px);
+}
+
+.user-dropdown a i {
+  margin-right: 0.75rem;
+  width: 16px;
+  text-align: center;
+}
+
+.user-dropdown a:first-child {
+  margin-top: 0.5rem;
+}
+
+.user-dropdown a:last-child {
+  margin-bottom: 0.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+}
+
+/* Responsive para menu do usuário */
+@media (max-width: 768px) {
+  .user-btn {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.9rem !important;
+  }
+  
+  .user-btn span {
+    display: none;
+  }
+  
+  .user-dropdown {
+    right: -50px;
+    min-width: 180px;
+  }
+  
+  .user-dropdown a {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-dropdown {
+    right: -70px;
+    min-width: 160px;
+  }
+}
