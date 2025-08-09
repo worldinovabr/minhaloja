@@ -90,10 +90,6 @@
               <i class="fas fa-sign-in-alt"></i>
               <span>Entrar</span>
             </button>
-            <button class="btn-register" onclick="openRegisterModal()">
-              <i class="fas fa-user-plus"></i>
-              <span>Cadastrar</span>
-            </button>
           </div>
           
           <div class="user-info">
@@ -258,6 +254,38 @@
             <i class="fas fa-trash"></i> Limpar Carrinho
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Login -->
+  <div id="login-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeLoginModal()">&times;</span>
+      <h2><i class="fas fa-sign-in-alt"></i> Entrar na Sua Conta</h2>
+      <form onsubmit="handleLogin(event)">
+        <input type="email" placeholder="E-mail" name="email" required>
+        <input type="password" placeholder="Senha" name="password" required>
+        <button type="submit" class="btn-primary">
+          <i class="fas fa-sign-in-alt"></i> Entrar
+        </button>
+      </form>
+      
+      <div class="modal-divider">
+        <span>ou</span>
+      </div>
+      
+      <div class="register-link">
+        <p>Ainda não tem uma conta?</p>
+        <button onclick="switchToRegister()" class="btn-link">
+          <i class="fas fa-user-plus"></i> Criar uma conta
+        </button>
+      </div>
+      
+      <div class="forgot-password">
+        <button onclick="showForgotPassword()" class="btn-link">
+          <i class="fas fa-key"></i> Esqueci minha senha
+        </button>
       </div>
     </div>
   </div>

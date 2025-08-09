@@ -834,6 +834,47 @@ function showSection(sectionId) {
   });
 }
 
+// Sistema de login
+function showLoginModal() {
+  document.getElementById('login-modal').style.display = 'block';
+}
+
+function closeLoginModal() {
+  document.getElementById('login-modal').style.display = 'none';
+}
+
+function handleLogin(event) {
+  event.preventDefault();
+  const formData = new FormData(event.target);
+  const email = formData.get('email');
+  const password = formData.get('password');
+
+  // Aqui você implementaria a autenticação real
+  console.log('Tentativa de login:', { email, password });
+  
+  // Simulação de login bem-sucedido (substitua pela lógica real)
+  if (email && password) {
+    alert('Login realizado com sucesso!');
+    closeLoginModal();
+    // Aqui você atualizaria a interface para mostrar o usuário logado
+  } else {
+    alert('E-mail ou senha inválidos!');
+  }
+}
+
+function switchToRegister() {
+  closeLoginModal();
+  openRegisterModal();
+}
+
+function showForgotPassword() {
+  const email = prompt('Digite seu e-mail para recuperação de senha:');
+  if (email) {
+    alert('Um link de recuperação foi enviado para seu e-mail!');
+    // Aqui você implementaria a recuperação de senha
+  }
+}
+
 // Sistema de cadastro
 function openRegisterModal() {
   document.getElementById('register-options-modal').style.display = 'block';
