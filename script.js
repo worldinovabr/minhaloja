@@ -1,28 +1,3 @@
-// Script.js - Compatibilidade mantida
-// Este arquivo mantém compatibilidade com acessos diretos ao index.html
-
-// Função para detectar se deve usar a vitrine ou redirecionar
-function initializeApp() {
-    // Se estivermos na página index.html, usar a vitrine
-    const currentPage = window.location.pathname.split('/').pop();
-    
-    if (currentPage === 'index.html' || currentPage === '') {
-        // Usar o sistema de vitrine
-        console.log('Iniciando vitrine da loja...');
-        return;
-    }
-    
-    // Para outras páginas, manter redirecionamento se necessário
-    if (currentPage === 'script.js') {
-        window.location.href = 'index.html';
-    }
-}
-
-// Inicializar quando a página carregar
-document.addEventListener('DOMContentLoaded', initializeApp);
-
-// Código original mantido para referência (comentado)
-/*
 const produtos = [
   { id: 1, nome: 'Camisa Polo', preco: 89.99, imagem: 'img/camisa1.jpg' },
   { id: 2, nome: 'Vestido Floral', preco: 149.99, imagem: 'img/vestido1.jpg' },
@@ -79,4 +54,3 @@ function finalizarCompra() {
 
 document.getElementById('ano').textContent = new Date().getFullYear();
 renderizarProdutos();
-*/
